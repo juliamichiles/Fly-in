@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 from errors import MapError
+from typing import Optional, Dict
+#FIXME: be consistent with returning a value or assigning directly inside method
+# as in, return nb_drones vs. self.nb_drones = nb_drones (inside method)
 
 
 class Parser():
@@ -13,13 +16,12 @@ class Parser():
 
     def _clean_map(self) -> list[str]:
         try:
-            with open() self.filename as file:
+            with open(self.filename, "r") as file:
                 lines = file.readlines()
         except (FileNotFoundError, PermissionError) as e:
             raise MapError(f"Couldn't read map '{self.filename}': {e}")
         
         clear_map = []
-        # should be in a try/except? Bc lines won't exist if there was an error 
         for line in lines:
             line = line.strip()
             if not line or line.startswith('#'):
@@ -27,27 +29,55 @@ class Parser():
             clear_map.append(line)
         return clear_map
     
-    def parse_drones(self): 
-        #  The first line defines the number of drones using nb_drones: <number>.
-        # do I even need this? 
+    def _parse_drones(self): 
+        first_line = self.lines[0]
+        
+        if not first_line.startswith("nb_drones:"):
+            raise MapError(
+                    "First line must define the number of"
+                    " drones using 'nb_drones: <positive_integer>'."
+            )
+        try:
+            nb_drones = int(first_line.split(":", 1)[1].strip())
+            if nb_drones <= 0:
+                raise MapError("'nb_drones' must be a positive integer.")
+        except ValueError:
+            raise MapError("'nb_drones' must be a positive integer.")
+
+        return nb_drones
     
-    def parse_zone(self):
-    # Zone definition on each line using type prefixes:
-        # start_hub: <name> <x> <y> [metadata] marks the starting zone.
-        # end_hub: <name> <x> <y> [metadata] marks the end zone.
-        # hub: <name> <x> <y> [metadata] defines a regular zone.
-        # The connection syntax forbids dashes in zone names (see below).
-        # Zone types:
-            #  normal – Standard zone with 1 turn movement cost (default)
-            #  blocked – Inaccessible zone. Drones must not enter or pass 
-            #    through this zone. Any path using it is invalid.
-            #  restricted – A sensitive or dangerous zone. Movement to this 
-            #    zone costs 2 turns.
-            #  priority – A preferred zone. Movement to this zone costs 1 turn 
-            #    but should be prioritized in pathfinding.
+    def _parse_zone(self, line: str) -> tuple[str, int, int, Optional]:
+        
+        hub_type, body = line.split(":", 1)
+        if '[' in body:
+            clear_body, md_str = body.split('[', 1)
+        parts = clear_body.split()
+        if len(parts) < 3:
+            raise MapError(
+                    f"'{hub_type}' zone missing "
+                    " required name or coordinates."
+            )
+        try:
+            name = parts[0]
+            x = int(parts[1])
+            y = int(parts[2])
+        except ValueError:
+            raise MapError("Invalid coordinates: must be a numeric value.")
+        
+        # Not sure I want to check this here or in a validate method
+        if '-' in name:
+            raise MapError("Zone names cannot contain dashes.")
+        if name in self.zones:
+            raise MapError("Found duplicate zone name: '{name}'")
+        
+        metadata = {}
+        if md_str:
+            metadata = _parse_metadata(md_str)
+        
+        return hub_type, name, x, y, metadata
+
     
-    
-    def parse_connection(self):
+    def _parse_connection(self):
     # Connections are defined using connection: <name1>-<name2> [metadata]:
         #  Define a bidirectional connection (edge) between two zones.
         #  The connection syntax forbids dashes in zone names.
@@ -55,17 +85,42 @@ class Parser():
         #  max_link_capacity=<number> (default: 1) - Maximum drones that
         #    can traverse this connection simultaneously
     
-    def parse_metadata(self):
-    # All metadata is optional and enclosed in brackets [...] with default values:
-        #  zone=<type> (default: normal)
-        #  color=<value> (default: none)
-        #  max_drones=<number> (default: 1) - Maximum drones that can
-        #  occupy this one simultaneously
-        #  Tags inside brackets can appear in any order.
-    
-    # TODO: add return type
+    def _parse_metadata(self, md_str: str) -> Dict[str, str]:
+        
+        metadata: Dict[str, str] = {}
+        
+        if not md_str:
+            return metadata
+
+        content = md_str.strip("[]")
+        tokens = content.split()
+        for token in tokens:
+            if "=" in token:
+                key, value = token.split("=", 1)
+                metadata[key.strip()] = value.strip()
+            else:
+                raise MapError("Invalid metadata format.")
+                # Should I really raise an error here?
+        
+        return metadata
+
     def parse_map(self):
-        self.lines = parse_lines()
+        self.lines = self._clean_map()
+
+        if not self.lines:
+            raise MapError("Map file is empty.")
+        try:
+            self.nb_drones = self._parse_drones()
+        except MapError:
+            raise MapError()
+            # Also strange, why would I raise the same error again?
+        
+        """ parse from the second line onwards """
+        for line in self.lines[1::]:
+            if line.startswith(("hub:", "start_hub:", "end_hub:")):
+                zone = self._parse_zone(line) # will return a tuple
+                self.zones.update(zone)
+            elif line.startswith()
 
 
 if __name__ == "__main__":
