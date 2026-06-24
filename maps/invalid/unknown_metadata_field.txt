@@ -1,0 +1,4 @@
+nb_drones: 3
+start_hub: start 0 0 [speed=fast]
+end_hub: goal 1 1
+connection: start-goal

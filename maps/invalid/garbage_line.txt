@@ -1,0 +1,5 @@
+nb_drones: 3
+start_hub: start 0 0
+RANDOM TEXT HERE
+end_hub: goal 1 1
+connection: start-goal

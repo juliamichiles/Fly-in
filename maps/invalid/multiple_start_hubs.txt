@@ -1,0 +1,5 @@
+nb_drones: 3
+start_hub: start1 0 0
+start_hub: start2 1 1
+end_hub: goal 2 2
+connection: start1-goal

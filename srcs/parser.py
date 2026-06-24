@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from errors import MapError
-from typing import Optional, Dict
+from typing import Dict, Tuple, List
 from map_data import Map
 
 class Parser:
@@ -10,13 +10,17 @@ class Parser:
         # TODO: add typehints
         self.filename = filename
         self.lines = []
-   
-    def _clean_map(self) -> list[str]:
-   
+
+    def _clean_map(self) -> List[str]:
+
         try:
             with open(self.filename, "r") as file:
                 lines = file.readlines()
-        except (FileNotFoundError, PermissionError) as e:
+        except (
+                FileNotFoundError, 
+                PermissionError,
+                IsADirectoryError
+        ) as e:
             raise MapError(f"Couldn't read map '{self.filename}': {e}")
 
         clear_map = []
@@ -34,7 +38,7 @@ class Parser:
 
         if not first_line.startswith("nb_drones:"):
             raise MapError(
-                    f"[line {line_num}] must define the number of"
+                    f" must define the number of"
                     " drones using 'nb_drones: <positive_integer>'."
             )
         try:
@@ -46,7 +50,7 @@ class Parser:
 
         return nb_drones
 
-    def _parse_zone(self, line: str) -> tuple[str, dict]:
+    def _parse_zone(self, line: str) -> Tuple[str, Dict]:
         md_str = None
         hub_type, body = line.split(":", 1)
         body = body.strip()
@@ -65,11 +69,11 @@ class Parser:
             x = int(parts[1])
             y = int(parts[2])
         except ValueError:
-            raise MapError("Invalid coordinates: must be a numeric value.")
+            raise MapError(f" Invalid coordinates: must be a numeric value.")
 
         # Not sure I want to check this here or in a validate method
         if '-' in name:
-            raise MapError("Zone names cannot contain dashes.")
+            raise MapError(f"Zone names cannot contain dashes.")
 
         metadata = {}
         if md_str:
@@ -82,21 +86,20 @@ class Parser:
             "metadata": metadata
         }
 
-    def _parse_connection(
-            self, 
-            connect_str: str
-    ) -> tuple[str, str, Dict[str, str]]:
-   
+    def _parse_connection(self, connect_str: str) -> Tuple[
+            str,
+            str,
+            Dict[str, str]
+            ]:
+
         md_str = None
         metadata: Dict[str, str] = {}
-
         _, body = connect_str.split(":", 1)
         body = body.strip()
         connection_part = body
 
         if '[' in body:
             connection_part, md_str = body.split('[', 1)
-
         connection_part = connection_part.strip()
 
         if '-' not in connection_part:
@@ -112,7 +115,7 @@ class Parser:
             metadata = self._parse_metadata(md_str)
 
         return a, b, metadata
-    
+
     def _parse_metadata(self, md_str: str) -> Dict[str, str]:
 
         metadata: Dict[str, str] = {}
@@ -132,28 +135,51 @@ class Parser:
         return metadata
 
     def parse_map(self) -> Map:
-        
+
         self.lines = self._clean_map()
 
         if not self.lines:
             raise MapError("Map file is empty.")
-        
+
         zones = {}
         connections = []
         nb_drones = self._parse_drones()
-    
+
         """ parse from the second line onwards """
         for line_num, line in self.lines[1::]:
-            if line.startswith(("hub:", "start_hub:", "end_hub:")):
-                name, zone_data = self._parse_zone(line)
-                zones[name] = zone_data
-            elif line.startswith("connection:"):
-                connection = self._parse_connection(line)
-                connections.append(connection)
-       
+            try:
+                if line.startswith(("hub:", "start_hub:", "end_hub:")):
+                    name, zone_data = self._parse_zone(line)
+                    zones[name] = zone_data
+                elif line.startswith("connection:"):
+                    connection = self._parse_connection(line)
+                    connections.append(connection)
+            except MapError as e:
+                raise MapError(f"[line {line_num}] {e}")
+
         map_info = Map(nb_drones, zones, connections)
         return map_info
 
 
 if __name__ == "__main__":
-    ...
+    
+    import sys
+
+    argc: int = len(sys.argv) 
+    if argc == 2:
+        try:
+                parser = Parser(sys.argv[1])
+                map_info = parser.parse_map()
+                print("Success parsing map!\n")
+                print("=== MAP CONTENT ===")
+                print(f"Number of drones: {map_info.nb_drones}")
+                print(f"Zones: {map_info.zones}")
+                print(f"Connections: {map_info.connections}")
+        except MapError as e:
+            print(e)
+    elif argc < 2:
+        print("If you don't give me a file name, I can't open it...")
+
+    else:
+        print("Too many files! One at a time please...")
+
