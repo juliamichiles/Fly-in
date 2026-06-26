@@ -2,6 +2,7 @@
 from errors import MapError
 from typing import Dict, Tuple
 from map_data import Map
+from validation import Validation
 
 
 class Parser:
@@ -25,7 +26,7 @@ class Parser:
             raise MapError(f"Couldn't read map file: {e}")
 
         clear_map = []
-        line_num = -1  # haven't decided if the 1st line is 1 or 0
+        line_num = 0
         for line in lines:
             line_num += 1
             line = line.strip()
@@ -162,11 +163,16 @@ class Parser:
         zones: Dict[str, Dict[str, object]] = {}
         connections: list[tuple[str, str, dict[str, str]]] = []
         nb_drones = self._parse_drones()
+        seen_connection = False
 
         """ parse from the second line onwards """
         for line_num, line in self.lines:
             try:
                 if line.startswith(("hub:", "start_hub:", "end_hub:")):
+                    if seen_connection:
+                        raise MapError(
+                                "Zones must be defined before connections"
+                        )
                     name, zone_data = self._parse_zone(line, line_num)
                     if name in zones.keys():
                         raise MapError(
@@ -175,6 +181,7 @@ class Parser:
                         )
                     zones[name] = zone_data
                 elif line.startswith("connection:"):
+                    seen_connection = True
                     connection = self._parse_connection(line, line_num)
                     a, b, _, _ = connection
                     if a not in zones or b not in zones:
@@ -186,6 +193,9 @@ class Parser:
                 raise MapError(f"[line {line_num}] {e}")
 
         map_info = Map(nb_drones, zones, connections)
+        valid = Validation()
+        valid.validate(map_info)
+        
         return map_info
 
 

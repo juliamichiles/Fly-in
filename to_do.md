@@ -21,10 +21,13 @@
 [ ] Move some validation logic from Parser to Validate
     (keep in parser only what is necessary for it to work)
 [X] implement validate_connections
-[ ] finish validate_zones
-[ ] call validate inside parse_map
+[X] finish validate_zones
+[X] call validate inside parse_map
 [ ] test everything
 [ ] more tests with even more invalid maps
+- FIXME:
+    [ ] still passes some invalid maps
+    [ ] printing line twice for some errors
 
 # General
 [ ] think about project structure:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from errors import MapError
+from map_data import Map
 
-
-class Validate:
+class Validation:
 
     @staticmethod
     def _validate_zones(zones: dict[str, object]) -> None:
@@ -10,10 +10,57 @@ class Validate:
         end_count = 0
         start_count = 0
         valid_types = {"normal", "blocked", "restricted", "priority"}
+        
+        for _, zone in zones.items():
+            
+            zone_type = zone["type"]
+            metadata = zone["metadata"]
+            line = zone.get("line", "?")
 
-        for name, zone in zones.items():
+            if zone_type == "start_hub":
+                start_count += 1 
+            elif zone_type == "end_hub":
+                end_count += 1
+            elif zone_type != "hub":
+                raise MapError(
+                        f"[line {line}] Invalid hub type '{zone_type}'"
+                )
+            if end_count > 1 or start_count > 1:
+                raise MapError(
+                          f"[line {line}] Map must have exactly one end_hub"
+                          " and exactly one start_hub "
+                  )
+            
+            if metadata:
 
+                if "type" in metadata:
+                    value = metadata["type"] 
+                    if value not in valid_types:
+                        raise MapError(
+                                f"[line {line}] Invalid zone type '{value}'")
+            
+                if "max_drones" in metadata:
+                    value = metadata["max_drones"]
 
+                    if not value.isdigit() or int(value) <= 0:
+                        raise MapError(
+                                f"[line {line}] max_drones must "
+                                "be a positive integer"
+                        )
+                if "color" in metadata:
+                    value = metadata["color"]
+                    if not value.isalpha():
+                        raise MapError(
+                                f"[line {line}] Invalid color '{value}'")
+                else:
+                    # not sure if I should raise an exeption or just ignore
+                    raise MapError(
+                            f"[line {line}] Invalid metadata"
+                    )
+        if start_count == 0 or end_count == 0:
+            raise MapError(
+                    "[Invalid map] Missing end_hub or start_hub"
+                    )
     
     @staticmethod
     def _validate_connections(
@@ -25,7 +72,7 @@ class Validate:
         for connect in connections:
             zone_a, zone_b, metadata, line = connect
             
-            if metadata and set(metadata.keys()) != "{max_link_capacity"}:
+            if metadata and set(metadata.keys()) != {"max_link_capacity"}:
                 raise MapError(f"[line {line}] Invalid metadata")
                 # is this really the only allowed metadata for a connection?
             
@@ -55,20 +102,9 @@ class Validate:
                     )
 
     def validate(self, map_data: Map) -> None:
-        self.validate_connections(map_data.connections)
-        self.validate_zones(map_data.zones)
-  # The program must be able to handle any number of drones.
-    # There must be exactly one start_hub: zone and one end_hub: zone.
-    # Connections must link only previously defined zones using connection: <zone1>-<zone2> [metadata].
-    # The same connection must not appear more than once (e.g., a-b and b-a are considered duplicates).
-    # Any metadata block (e.g., [zone=... color=...] for zones, [max_link_capacity=...]
-    #for connections) must be syntactically valid.
-    # Zone types must be one of: normal, blocked, restricted, priority. Any invalid
-    #type must raise a parsing error.
-    # Capacity values (max_drones for zones, max_link_capacity for connections) must
-    #be positive integers.
-    # Any other parsing error must stop the program and return a clear error message
-    #indicating the line and cause.
-    #
+        self._validate_connections(map_data.connections)
+        self._validate_zones(map_data.zones)
+
+
 if __name__ == "__main__":
     ...
