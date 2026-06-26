@@ -1,0 +1,22 @@
+
+=== File: .gitignore ===
+[line 1] undefined number of nb_drones
+
+=== File: invalid_metadata_syntax_2 ===
+Invalid metadata format.
+
+=== File: invalid_coordinates ===
+Invalid coordinates: must be a numeric value.
+
+=== File: invalid_metadata_syntax ===
+Invalid metadata format.
+
+=== File: invalid_zone_name_space ===
+Too many fields for zone! Expected:
+	'<hub_type>: <name> <x> <y>'
+
+=== File: invalid_zone_name_dash ===
+Zone names cannot contain dashes.
+
+=== File: invalid_connection_syntax ===
+Invalid connection: must contain '-'

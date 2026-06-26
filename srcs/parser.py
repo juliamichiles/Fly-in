@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from errors import MapError
-from typing import Dict, Tuple
 from map_data import Map
 from validation import Validation
 
@@ -9,11 +8,10 @@ class Parser:
 
     def __init__(self, filename: str) -> None:
 
-        # TODO: add typehints
-        self.filename = filename
-        self.lines: list[Tuple[int, str]] = []
+        self.filename: str = filename
+        self.lines: list[tuple[int, str]] = []
 
-    def _clean_map(self) -> list[Tuple[int, str]]:
+    def _clean_map(self) -> list[tuple[int, str]]:
 
         try:
             with open(self.filename, "r") as file:
@@ -23,38 +21,49 @@ class Parser:
                 PermissionError,
                 IsADirectoryError
         ) as e:
-            raise MapError(f"Couldn't read map file: {e}")
+            raise MapError(f"[invalid map file] Couldn't read map file:\n{e}")
 
         clear_map = []
         line_num = 0
+
         for line in lines:
+
             line_num += 1
             line = line.strip()
+
             if not line or line.startswith('#'):
                 continue
+
             clear_map.append((line_num, line))
+
         return clear_map
 
     def _parse_drones(self) -> int:
-        _, first_line = self.lines[0]
+
+        n, first_line = self.lines[0]
 
         if not first_line.startswith("nb_drones:"):
+            raise MapError(f"[line {n}] undefined number of drones")
+
+        nb_str = first_line.split(":", 1)[1].strip()
+
+        if not nb_str.isdigit():
             raise MapError(
-                    " must define the number of drones "
-                    "using 'nb_drones:\n\t<positive_integer>'."
+                    f"[line {n}] 'nb_drones' must be a positive number."
             )
-        try:
-            nb_drones = int(first_line.split(":", 1)[1].strip())
-            if nb_drones <= 0:
-                raise MapError("'nb_drones' must be a positive integer.")
-        except ValueError:
-            raise MapError("'nb_drones' must be a positive integer.")
+
+        nb_drones = int(nb_str)
+
+        if nb_drones <= 0:
+            raise MapError(
+                    f"[line {n}] 'nb_drones' must be a positive number."
+            )
 
         return nb_drones
 
     def _parse_zone(self,
                     line: str,
-                    n: int) -> Tuple[str, Dict[str, object]]:
+                    n: int) -> tuple[str, dict[str, object]]:
 
         md_str = None
         hub_type, body = line.split(":", 1)
@@ -65,24 +74,24 @@ class Parser:
         if '[' in body:
             clear_body, md_str = body.split('[', 1)
         parts = clear_body.split()
-        
+
         if len(parts) < 3:
             raise MapError(
                     f"'{hub_type}' zone missing "
                     " required name or coordinates."
             )
-        
+
         elif len(parts) > 3:
             raise MapError(
                     "Too many fields for zone! Expected:\n\t"
                     "'<hub_type>: <name> <x> <y>'"
             )
-        
+
         try:
             name = parts[0]
             x = int(parts[1])
             y = int(parts[2])
-        
+
         except ValueError:
             raise MapError("Invalid coordinates: must be a numeric value.")
 
@@ -102,15 +111,15 @@ class Parser:
             "line": n
         }
 
-    def _parse_connection(self, connect_str: str, n: int) -> Tuple[
+    def _parse_connection(self, connect_str: str, n: int) -> tuple[
             str,
             str,
-            Dict[str, str],
+            dict[str, str],
             int
             ]:
 
         md_str = None
-        metadata: Dict[str, str] = {}
+        metadata: dict[str, str] = {}
         _, body = connect_str.split(":", 1)
         body = body.strip()
         connection_part = body
@@ -133,9 +142,9 @@ class Parser:
 
         return a, b, metadata, n
 
-    def _parse_metadata(self, md_str: str) -> Dict[str, str]:
+    def _parse_metadata(self, md_str: str) -> dict[str, str]:
 
-        metadata: Dict[str, str] = {}
+        metadata: dict[str, str] = {}
 
         if not md_str:
             return metadata
@@ -158,44 +167,55 @@ class Parser:
         self.lines = self._clean_map()
 
         if not self.lines:
-            raise MapError("Map file is empty.")
+            raise MapError("[invalid map file] map is empty")
 
-        zones: Dict[str, Dict[str, object]] = {}
+        zones: dict[str, dict[str, object]] = {}
         connections: list[tuple[str, str, dict[str, str]]] = []
         nb_drones = self._parse_drones()
         seen_connection = False
 
         """ parse from the second line onwards """
         for line_num, line in self.lines:
-            try:
-                if line.startswith(("hub:", "start_hub:", "end_hub:")):
-                    if seen_connection:
-                        raise MapError(
-                                "Zones must be defined before connections"
-                        )
-                    name, zone_data = self._parse_zone(line, line_num)
-                    if name in zones.keys():
-                        raise MapError(
-                                f"[line {line_num}]"
-                                " duplicate zone name!"
-                        )
-                    zones[name] = zone_data
-                elif line.startswith("connection:"):
-                    seen_connection = True
-                    connection = self._parse_connection(line, line_num)
-                    a, b, _, _ = connection
-                    if a not in zones or b not in zones:
-                        raise MapError(
-                                f"[line {line_num}] connection"
-                                " to unknown zone!")
-                    connections.append(connection)
-            except MapError as e:
-                raise MapError(f"[line {line_num}] {e}")
+
+            if line.startswith(("hub:", "start_hub:", "end_hub:")):
+
+                if seen_connection:
+                    raise MapError(
+                            f"[line {line_num}] Zones must "
+                            "be defined before connections"
+                    )
+                name, zone_data = self._parse_zone(line, line_num)
+
+                if name in zones:
+                    raise MapError(f"[line {line_num}] duplicate zone name!")
+
+                zones[name] = zone_data
+
+            elif line.startswith("connection:"):
+                seen_connection = True
+                connection = self._parse_connection(line, line_num)
+                a, b, _, _ = connection
+
+                if a not in zones or b not in zones:
+                    raise MapError(
+                            f"[line {line_num}] connection"
+                            " to unknown zone!")
+                connections.append(connection)
+
+            elif not line.startswith(
+                    ("nb_drones:", "hub:", "start_hub:", "end_hub:", "connection:")
+                    ):
+                raise MapError(f"[line {line_num}] unknown syntax")
+            
+        if not connections:
+            raise MapError(
+                    f"[invalid map file] map must have connections"
+            )
 
         map_info = Map(nb_drones, zones, connections)
         valid = Validation()
         valid.validate(map_info)
-        
+
         return map_info
 
 

@@ -13,8 +13,9 @@
     [X] Check for dashes AND SPACES on zone names! 
     [X] Check for repeated names while parsing? Bc the dict might simply 
         replace an old key if I try to add one with a repeated name?
-    [ ] Ensure zones are listed before connections - I think I've fixed it (?)
+    [X] Ensure zones are listed before connections - I think I've fixed it (?)
     [X] Check for closing brackets in parse_metadata
+[ ] re-write the entire thing to look pretty? 
 
 # Validation:
 [X] Create a separate Validate module to further validate Map object
@@ -26,8 +27,18 @@
 [ ] test everything
 [ ] more tests with even more invalid maps
 - FIXME:
-    [ ] still passes some invalid maps
-    [ ] printing line twice for some errors
+    [X] printing line twice for some errors
+    [ ] not printing line for duplicte zone name and invalid zone name 
+    [ ] prints the wrong error message:
+        [ ] multiple brackets maps -> connection to unknown zone 
+        [ ] empty file -> missing nb_drones
+    [ ] not printing line num for:
+        [ ] invalid_metadata_syntax_2
+        [ ] invalid_nb_drones
+        [ ] invalid_zone_name_space
+        [ ] invalid_coordinates
+        [ ] invalid_connection_syntax
+        [ ] others (see unexpected_outputs file)
 
 # General
 [ ] think about project structure:
