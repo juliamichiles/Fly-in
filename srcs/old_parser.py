@@ -2,34 +2,15 @@
 from errors import MapError
 from map_data import Map
 from validation import Validation
-import re 
+
 
 class Parser:
-    
-    # FIXME: Can I have this uppercase variables? 
-    DRONE_PAT = re.compile(r"^nb_drones:\s*(\d+)$")
-    # Matches: <type>: <name> <x> <y> [metadata]
-    # Captures: type, name, x, y, and optional metadata string
-    ZONE_PAT = re.compile(
-        r"^(hub|start_hub|end_hub):\s*"  # type
-        r"([^\s\[\-]+)\s+"               # name
-        r"(-?\d+)\s+"                    # x
-        r"(-?\d+)"                       # y
-        r"(?:\s*\[(.*)\])?$"             # optional metadata
-    ) 
-    # Matches: connection: <name>-<name> [metadata]
-    # Captures: node_a, node_b, and optional metadata string
-    CONN_PAT = re.compile(
-            r"^connection:\s*([^\s\[\-]+)-([^\s\[\-]+)(?:\s*\[(.*)\])?$"
-            )
-    # Matches: key=value
-    META_PAT = re.compile(r"([^\s=]+)=([^\s=]+)")
 
     def __init__(self, filename: str) -> None:
 
         self.filename: str = filename
         self.lines: list[tuple[int, str]] = []
-        
+
     def _clean_map(self) -> list[tuple[int, str]]:
 
         try:
@@ -43,10 +24,16 @@ class Parser:
             raise MapError(f"[invalid map file] Couldn't read map file:\n{e}")
 
         clear_map = []
-        for line_num, line in enumerate(lines, start=1):
+        line_num = 0
+
+        for line in lines:
+
+            line_num += 1
             line = line.strip()
+
             if not line or line.startswith('#'):
                 continue
+
             clear_map.append((line_num, line))
 
         return clear_map
@@ -54,12 +41,19 @@ class Parser:
     def _parse_drones(self) -> int:
 
         n, first_line = self.lines[0]
-        match = self.DRONE_PAT.match(first_line)
 
-        if not match:
+        if not first_line.startswith("nb_drones:"):
             raise MapError(f"[line {n}] undefined number of drones")
 
-        nb_drones = int(match.group(1))
+        nb_str = first_line.split(":", 1)[1].strip()
+
+        if not nb_str.isdigit():
+            raise MapError(
+                    f"[line {n}] 'nb_drones' must be a positive number."
+            )
+
+        nb_drones = int(nb_str)
+
         if nb_drones <= 0:
             raise MapError(
                     f"[line {n}] 'nb_drones' must be a positive number."
@@ -71,59 +65,100 @@ class Parser:
                     line: str,
                     n: int) -> tuple[str, dict[str, object]]:
 
-        match = self.ZONE_PAT.match(line)
-        if not match:
+        md_str = None
+        hub_type, body = line.split(":", 1)
+        body = body.strip()
+        hub_type = hub_type.strip()
+        clear_body = body
+
+        if '[' in body:
+            clear_body, md_str = body.split('[', 1)
+        parts = clear_body.split()
+
+        if len(parts) < 3:
             raise MapError(
-                    f"[line {n}]: Invalid zone syntax"
-                    "Expected '<hub_type>: <name> <x> <y> [metadata]'"
+                    f"'{hub_type}' zone missing "
+                    " required name or coordinates."
             )
-        
-        hub_type, name, x_str, y_str, md_str = match.groups()
-        metadata = self._parse_metadata(md_str)
+
+        elif len(parts) > 3:
+            raise MapError(
+                    "Too many fields for zone! Expected:\n\t"
+                    "'<hub_type>: <name> <x> <y>'"
+            )
+
+        try:
+            name = parts[0]
+            x = int(parts[1])
+            y = int(parts[2])
+
+        except ValueError:
+            raise MapError("Invalid coordinates: must be a numeric value.")
+
+        # Not sure I want to check this here or in a validate method
+        if '-' in name:
+            raise MapError("Zone names cannot contain dashes.")
+
+        metadata = {}
+        if md_str:
+            metadata = self._parse_metadata(md_str)
+
         return name, {
             "type": hub_type,
-            "x": int(x_str),
-            "y": int(y_str),
+            "x": x,
+            "y": y,
             "metadata": metadata,
             "line": n
         }
 
-    def _parse_connection(self, line: str, n: int) -> tuple[
+    def _parse_connection(self, connect_str: str, n: int) -> tuple[
             str,
             str,
             dict[str, str],
             int
             ]:
-    
-        match = self.CONN_PAT.match(line)
-        if not match:
-            raise MapError(
-                    f"[line {n}] Invalid connection syntax"
-                    "Expected 'connection: <A>-<B> [metadata]'"
-                    )
 
-        a, b, md_str = match.groups()
-        metadata = self._parse_metadata(md_str)
+        md_str = None
+        metadata: dict[str, str] = {}
+        _, body = connect_str.split(":", 1)
+        body = body.strip()
+        connection_part = body
+
+        if '[' in body:
+            connection_part, md_str = body.split('[', 1)
+        connection_part = connection_part.strip()
+
+        if '-' not in connection_part:
+            raise MapError("Invalid connection: must contain '-'")
+
+        parts = connection_part.split('-')
+        if len(parts) != 2:
+            raise MapError("Invalid connection: must be in format 'A-B'")
+
+        a, b = parts[0].strip(), parts[1].strip()
+
+        if md_str:
+            metadata = self._parse_metadata(md_str)
+
         return a, b, metadata, n
 
     def _parse_metadata(self, md_str: str) -> dict[str, str]:
 
-        metadata = {}
-        
+        metadata: dict[str, str] = {}
+
         if not md_str:
             return metadata
 
-        tokens = md_str.strip().split()
-        
+        if ']' not in md_str:
+            raise MapError("Invalid metadata format.")
+        content = md_str.strip("[]")
+        tokens = content.split()
         for token in tokens:
-            match = self.META_PAT.match(token)
-            if not match:
-                raise MapError(
-                        f"Invalid metadata format: '{token}'"
-                        " must be in 'key=value' format."
-                )
-            key, value = match.groups()
-            metadata[key] = value
+            if "=" in token:
+                key, value = token.split("=", 1)
+                metadata[key.strip()] = value.strip()
+            else:
+                raise MapError("Invalid metadata format.")
 
         return metadata
 
