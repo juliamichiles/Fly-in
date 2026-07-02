@@ -33,8 +33,13 @@
     [ ] prints the wrong error message:
         [ ] multiple brackets maps -> connection to unknown zone 
         [ ] empty file -> missing nb_drones
+
 # Graph:
-[ ] Created graph - untested
+[X] Created graph - tested
+[X] Implemented Dijkstra
+[ ] Apparently working - see chat for minor fixes
+[ ] More tests
+[ ] Create a main file so we can just update it as the project grows
 
 # General
 [ ] think about project structure:
@@ -42,7 +47,9 @@
     - How to organize directories?
 [ ] choose algorithm(s)
 [ ] decide graph's structure
-
+[ ] DOCSTRINGS!!!
+[ ] Mypy + flake8
+[ ] README
 - Graph 
 - Pathfinding algorithm(s)
 - Traffic simulation
