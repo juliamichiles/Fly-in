@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from heapq import heappop, heappush
+from typing import Optional
 from graph import Graph
 
 
@@ -9,35 +10,37 @@ class PathFinding:
 
     @staticmethod
     def dijkstra(
-            graph: Graph,
-            start: str,
-            end: str
-            ) -> tuple[list, int | float]:
-        
-        # (total_cost, current_node, path)
-        heap = [(0, start, [])]
-        visited: set[str] = set()
+        graph: Graph,
+        start: str,
+        end: str
+        ) -> tuple[Optional[list[str]], float]: 
+        to_explore: list[tuple[int, str, list[str]]] = [(0, start, [])]
+        distances: dict[str, int] = {start: 0}
 
-        while heap:
-            cost, node, path = heappop(heap)
-            
-            if node in visited:
+        while to_explore:
+            cost, node, path = heappop(to_explore)
+
+            # Ignore outdated paths
+            if cost > distances.get(node, float("inf")):
                 continue
-            visited.add(node)
-            
+
             path = path + [node]
-            
+
             if node == end:
                 return path, cost
-            
+
+            # loop through each neighbor
             for neighbor, move_cost, metadata in graph.neighbors(node):
                 if graph.is_blocked(neighbor):
                     continue
-                item = (cost + move_cost, neighbor, path)
-                heappush(heap, item)
+
+                new_cost: int = cost + move_cost
+
+                if new_cost < distances.get(neighbor, float("inf")):
+                    distances[neighbor] = new_cost
+                    heappush(to_explore, (new_cost, neighbor, path))
 
         return None, float("inf")
-
 
 
 if __name__ == "__main__":
