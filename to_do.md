@@ -36,10 +36,15 @@
 
 # Graph:
 [X] Created graph - tested
+
+# Pathfinding
 [X] Implemented Dijkstra
-[ ] Apparently working - see chat for minor fixes
-[ ] More tests
+[X] Apparently working - see chat for minor fixes
+[X] More tests
 [ ] Create a main file so we can just update it as the project grows
+[ ] Implement multiple "shortest paths"
+[ ] Visualization
+[ ] Traffic simulation
 
 # General
 [ ] think about project structure:
