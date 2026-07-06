@@ -41,10 +41,15 @@
 - [X] Implemented Dijkstra
 - [X] Apparently working - see chat for minor fixes
 - [X] More tests
-- [ ] Create a main file so we can just update it as the project grows
-- [ ] Implement multiple "shortest paths"
+- [X] Implement multiple "shortest paths"
+- [ ] Notes on assign dones
+- [ ] Implement simulation + notes on it 
+- [ ] Ver chat
+
+# Later:
 - [ ] Visualization
 - [ ] Traffic simulation
+- [ ] Create a main file so we can just update it as the project grows
 
 # General
 - [ ] think about project structure:

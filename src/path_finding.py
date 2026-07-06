@@ -7,7 +7,7 @@ from graph import Graph
 class PathFinding:
 
     # more stuff? An init? variables? Otherwise move this to graph
-
+    # TODO: Actually remove this? Keep just the k_paths
     @staticmethod
     def dijkstra(
         graph: Graph,
@@ -41,6 +41,50 @@ class PathFinding:
                     heappush(to_explore, (new_cost, neighbor, path))
 
         return None, float("inf")
+    
+    def _check_similarity(
+            self,
+            path_a: list[str], 
+            path_b: list[str], 
+            threshold: float
+            ) -> bool:
+        set_a = set(path_a)
+        set_b = set(path_b)
+        
+        common = len(set_a & set_b)
+        similarity = common / max(len(set_a), 1)
+
+        return similarity > threshold
+
+    def k_short_paths(self, graph, start, end, k):
+        to_explore = [(0, start, [])]
+        results: list[tuple[list[str], int]] = []
+    
+        while to_explore:
+            cost, current, path = heappop(to_explore)
+            path = path + [current]
+    
+            if current == end:
+                is_similar = any(
+                    self._check_similarity(other_path, path, 0.7)
+                    for other_path, _ in results
+                )
+                if not is_similar:
+                    results.append((path, cost))
+                if len(results) == k:
+                    return results
+                continue
+    
+            for neighbor, move_cost, metadata in graph.neighbors(current):
+                if graph.is_blocked(neighbor):
+                    continue
+                if neighbor in path:
+                    continue
+    
+                new_cost = cost + move_cost
+                heappush(to_explore, (new_cost, neighbor, path))
+    
+        return results
 
 
 if __name__ == "__main__":
@@ -78,6 +122,31 @@ if __name__ == "__main__":
             pprint(f"Found shortest path: {PathFinding.dijkstra(graph, start, end)}")
         except MapError as e:
             print(e)
+    elif argc == 3:
+        parser = Parser(sys.argv[1])
+        map_info = parser.parse_map()
+        print("Success parsing map!\n")
+        print("=== MAP CONTENT ===")
+        print("\n".join(
+            f"{name}: {info['type']} at ({info['x']}, {info['y']}) "
+            f"[{info['metadata'].get('color', 'none')}]"
+            for name, info in map_info.zones.items()
+                )
+        )
+        print("Generating graph...")
+        graph = Graph(map_info.zones, map_info.connections)
+        print("[WARNING] nb_drones will be ignored for now")
+        start = graph.get_start()
+        end = graph.get_end()
+        try:
+            k = int(sys.argv[2])
+            if k < 0:
+                k = k * -1
+            pprint(f"Trying to find up to {k} shortest paths...")
+            p_finding = PathFinding()
+            pprint(p_finding.k_short_paths(graph, start, end, k))
+        except ValueError as e:
+            print(f"{e}: second argument must be a numeric value")
     elif argc < 2:
         print("If you don't give me a file name, I can't open it...")
 
