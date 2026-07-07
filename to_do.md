@@ -1,8 +1,12 @@
+# Next:
+- [ ] Update ReservationTable to handle capacities - see chat
+    (Graph already has helper methods to get zone/connection capacities)
+
 # Parser:
 - Parses map file in a data structure and partially validates it so far
 - [X] fixed most issues I hope...
 - [X] missing parse_connections
-- [X] parse_map is not storing data in the dict properly (see chat)
+- [X] parse_map is not storing data in the dict properly
 - [x] implement the rest of parse_map
 - [X] Reestructure Parser:
     - [X] Create Map object and store map data there instead of in Parser 
@@ -55,13 +59,17 @@
 - [ ] think about project structure:
     - What should be a package with init?
     - How to organize directories?
-- [ ] choose algorithm(s)
-- [ ] decide graph's structure
+- [X] choose algorithm(s)
+- [X] decide graph's structure
+- [X] stardef multi-agent path finding
 - [ ] DOCSTRINGS!!!
 - [ ] Mypy + flake8
 - [ ] README
-- Graph 
-- Pathfinding algorithm(s)
+- [ ] Re-name files, Reestructure them and maybe redistribute classes
 - Traffic simulation
 - Visualization
 - Makefile
+
+# Notes on:
+- [ ] "Draw" all data structures
+- [ ] mapf file methods

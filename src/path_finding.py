@@ -85,7 +85,23 @@ class PathFinding:
                 heappush(to_explore, (new_cost, neighbor, path))
     
         return results
+    
+    def assign_drones(
+            paths: list[tuple[list[str], int]],
+            nb_drones: int
+            ) -> list[list[list[str]]]:
+        
+        assigned: list[int] = [0] * len(paths)
+        drone_paths: list[list[str]] = []
 
+        for _ in range(nb_drones):
+            best_index = min(
+                    range(len(paths)),
+                    key=lambda i: len(paths[i][0]) + assigned[i]
+                    )
+            assigned[best_index] += 1
+            drone_paths.append(paths[best_index][0])
+        retun drone_paths
 
 if __name__ == "__main__":
 
