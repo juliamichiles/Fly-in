@@ -9,8 +9,10 @@ class Graph:
 
     def __init__(self,
                  zones: dict[str, dict[str, object]],
-                 connections: list[tuple[str, str, dict[str, str], int]]):
+                 connections: list[tuple[str, str, dict[str, str], int]]
+                 ) -> None:
         self.zones = zones
+        self.connections = connections
         self.graph = self._build_graph(connections)
 
     @staticmethod
@@ -60,17 +62,18 @@ class Graph:
         capacity = self.zones[node]["metadata"].get("max_drones", 1)
         return int(capacity)
     
-    def connection_capacity(
-            self, 
-            metadata: dict[str, str]) -> int | float:
-        capacity = metadata.get("max_link_capacity")
-        return float("inf") if capacity is None else int(capacity)
-
+    def connection_capacity(self, a: str, b: str) -> int | float:
+        for src, dst, metadata, _ in self.connections:
+            if (src == a and dst == b) or \
+            (src == b and dst == a):
+                capacity = metadata.get("max_link_capacity")
+                return float("inf") if capacity is None else int(capacity)
+        raise ConnectionError(f"No connection between {a} and {b}")
+    
     def get_end(self) -> str:
         for name, zone in self.zones.items():
             if zone["type"] == "end_hub":
                 return name
-
 
     def get_start(self) -> str:
         for name, zone in self.zones.items():

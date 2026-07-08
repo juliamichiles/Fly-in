@@ -1,5 +1,7 @@
 # Next:
-- [ ] Update ReservationTable to handle capacities - see chat
+- [ ] Create a new chat and start Visualization probably?
+    (give it all files so far for context)
+- [X] Update ReservationTable to handle capacities - see chat
     (Graph already has helper methods to get zone/connection capacities)
 
 # Parser:
@@ -23,7 +25,7 @@
 
 # Validation:
 - [X] Create a separate Validate module to further validate Map object
-- [ ] Move some validation logic from Parser to Validate
+- [X] Move some validation logic from Parser to Validate
      (keep in parser only what is necessary for it to work)
 - [X] implement validate_connections
 - [X] finish validate_zones
@@ -46,14 +48,16 @@
 - [X] Apparently working - see chat for minor fixes
 - [X] More tests
 - [X] Implement multiple "shortest paths"
-- [ ] Notes on assign dones
-- [ ] Implement simulation + notes on it 
-- [ ] Ver chat
+- [X] Notes on assign dones
+- [X] Implement simulation + notes on it 
+- [ ] More notes on actual workflow of assign_drones and simulation
+- [ ] Actually test, with a bunch of different maps
+- [ ] Print more stages of the simulation - for testing purposes
 
 # Later:
 - [ ] Visualization
 - [ ] Traffic simulation
-- [ ] Create a main file so we can just update it as the project grows
+- [X] Create a main file so we can just update it as the project grows
 
 # General
 - [ ] think about project structure:
@@ -71,5 +75,5 @@
 - Makefile
 
 # Notes on:
-- [ ] "Draw" all data structures
+- [X] "Draw" all data structures
 - [ ] mapf file methods

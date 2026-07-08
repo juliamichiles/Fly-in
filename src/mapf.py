@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from graph import Graph
+import graph
 
 
 class Drone:
@@ -10,15 +11,18 @@ class Drone:
 
 
 class ReservationTable:
-    def __init__(self) -> None:
+    def __init__(self, graph: Graph) -> None:
         self.node_reservations: dict[tuple[str, int], list[int]] = {}
         self.edge_reservations: dict[tuple[str, str, int], list[int]] = {}
+        self.graph = graph
 
     def reserve_node(self, node: str, time: int, drone_id: int) -> None:
-        self.node_reservations[(node, time)] = drone_id
+        self.node_reservations.setdefault((node, time), []).append(drone_id)
 
     def is_node_free(self, node: str, time: int) -> bool:
-        return (node, time) not in self.node_reservations
+        capacity = self.graph.zone_capacity(node)
+        current = self.node_reservations.get((node, time), [])
+        return len(current) < capacity
     
     def reserve_edge(
             self, 
@@ -27,17 +31,19 @@ class ReservationTable:
             time: int, 
             drone_id: int
             ) -> None:
-        self. edge_reservations[(a, b, time)] = drone_id
-
+        self.edge_reservations.setdefault((a, b, time), []).append(drone_id)
+    
     def is_edge_free(self, a: str, b: str, time: int) -> bool:
-        return (a, b, time) not in self.edge_reservations
+        capacity = self.graph.connection_capacity(a, b)
+        current = self.edge_reservations.get((a, b, time), [])
+        return len(current) < capacity
     
     # should also add methods to handle capacities here?
 
 class Scheduler:
     def __init__(self, graph: Graph) -> None:
         self.graph = graph
-        self.reservations = ReservationTable()
+        self.reservations = ReservationTable(graph)
 
     def schedule(self, drones: list[Drone]) -> None:
         active = True
@@ -70,7 +76,7 @@ class Scheduler:
                     self.reservations.reserve_edge(
                             current_node, next_node, time, drone.id
                             )
-                time += 1
+            time += 1
 
 if __name__ == "__main__":
     ...

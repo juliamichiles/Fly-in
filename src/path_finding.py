@@ -86,6 +86,7 @@ class PathFinding:
     
         return results
     
+    @staticmethod
     def assign_drones(
             paths: list[tuple[list[str], int]],
             nb_drones: int
@@ -101,7 +102,7 @@ class PathFinding:
                     )
             assigned[best_index] += 1
             drone_paths.append(paths[best_index][0])
-        retun drone_paths
+        return drone_paths
 
 if __name__ == "__main__":
 
