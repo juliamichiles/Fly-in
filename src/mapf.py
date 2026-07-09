@@ -5,10 +5,10 @@ import graph
 
 class Drone:
     def __init__(self, drone_id: int, path: list[str]) -> None:
-         self.id = drone_id 
-         self.path = path
-         self.position_index = -1
-
+        self.id = drone_id 
+        self.path = path
+        self.position_index = -1
+        self.history: list[str | None] = []
 
 class ReservationTable:
     def __init__(self, graph: Graph) -> None:
@@ -31,14 +31,17 @@ class ReservationTable:
             time: int, 
             drone_id: int
             ) -> None:
-        self.edge_reservations.setdefault((a, b, time), []).append(drone_id)
+        key = self._edge_key(a, b, time)
+        self.edge_reservations.setdefault(key, []).append(drone_id)
     
     def is_edge_free(self, a: str, b: str, time: int) -> bool:
         capacity = self.graph.connection_capacity(a, b)
-        current = self.edge_reservations.get((a, b, time), [])
+        key = self._edge_key(a, b, time)
+        current = self.edge_reservations.get(key, [])
         return len(current) < capacity
     
-    # should also add methods to handle capacities here?
+    def _edge_key(self, a: str, b: str, time: int) -> tuple[str, str, int]:
+        return (min(a, b), max(a, b), time)
 
 class Scheduler:
     def __init__(self, graph: Graph) -> None:
@@ -67,7 +70,7 @@ class Scheduler:
                     continue
                 if current_node is not None:
                     if not self.reservations.is_edge_free(
-                            next_node, current_node, time
+                            current_node, next_node, time
                             ):
                         continue
                 drone.position_index = next_pos
@@ -76,6 +79,12 @@ class Scheduler:
                     self.reservations.reserve_edge(
                             current_node, next_node, time, drone.id
                             )
+            for drone in drones:
+                if drone.position_index >= 0:
+                    drone.history.append(drone.path[drone.position_index])
+                else:
+                    drone.history.append(None)
+
             time += 1
 
 if __name__ == "__main__":
