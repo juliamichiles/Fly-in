@@ -50,14 +50,23 @@
 - [X] Implement multiple "shortest paths"
 - [X] Notes on assign dones
 - [X] Implement simulation + notes on it 
-- [ ] More notes on actual workflow of assign_drones and simulation
+- [X] More notes on actual workflow of assign_drones and simulation
 - [ ] Actually test, with a bunch of different maps
 - [ ] Print more stages of the simulation - for testing purposes
+- [ ] Notes on simulation and ReservationTable
+
+# GUI:
+- [X] Minimal vizualization - hard to read, needs fixing
+- [ ] take notes 
 
 # Later:
-- [ ] Visualization
-- [ ] Traffic simulation
+- [X] Starrted visualization
+- [X] Traffic simulation
 - [X] Create a main file so we can just update it as the project grows
+- [ ] Create test programs to verify project functionality (not submitted or
+        graded). Use frameworks like pytest or unittest for unit tests, covering 
+        ege cases.
+- [ ] Is algorithm too naif? Maybe improve mapf algorithm
 
 # General
 - [ ] think about project structure:
@@ -77,3 +86,4 @@
 # Notes on:
 - [X] "Draw" all data structures
 - [ ] mapf file methods
+- [ ] GUI + pygame

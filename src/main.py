@@ -5,6 +5,7 @@ from errors import MapError
 from graph import Graph
 from path_finding import PathFinding
 from mapf import Drone, Scheduler
+from gui import Vizualizer
 
 
 def print_map(map_info):
@@ -33,6 +34,8 @@ def simulate(graph, paths, nb_drones):
     print("\n=== SIMULATION ===")
     scheduler = Scheduler(graph)
     scheduler.schedule(drones)
+    viz = Vizualizer(graph, drones)
+    viz.run()
 
     for d in drones:
         print(f"Drone {d.id} final position index: {d.position_index}")
