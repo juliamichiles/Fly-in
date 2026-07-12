@@ -1,2 +1,6 @@
 class MapError(Exception):
     ...
+
+
+class ConnectionError(Exception):
+    ...

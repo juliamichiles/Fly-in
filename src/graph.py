@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from map_data import Map
+from errors import ConnectionError
 # TODO: add typehints
 
 
@@ -16,16 +17,18 @@ class Graph:
         self.graph = self._build_graph(connections)
 
     @staticmethod
-    def _get_cost(zone) -> int | None:
+    def _get_cost(zone) -> float | None:
         # cost depends on the destination node, not the connection.
         zone_type = zone["metadata"].get("zone", "normal")
 
         if zone_type == "blocked":
             return None
         elif zone_type == "restricted":
-            return 2
+            return 2.0
+        elif zone_type == "priority":
+            return 0.9
         else:
-            return 1  # bc priority and normal have the same cost
+            return 1.0 
 
     def _build_graph(
             self, 

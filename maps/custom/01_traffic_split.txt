@@ -1,0 +1,51 @@
+# Map Name: The Traffic Split Test
+nb_drones: 10
+
+# The starting point holds all 4 drones safely
+start_hub: start 0 0 [color=green max_drones=4]
+
+# --- SPLIT 1: The Initial Fork ---
+# Path A is short but tight. Path B is a wide detour.
+hub: short_path_1 1 -1 [color=blue max_drones=2]
+hub: short_path_2 2 -1 [color=blue max_drones=2]
+
+hub: long_detour_1 1 1 [color=orange max_drones=4]
+hub: long_detour_2 2 2 [color=orange max_drones=4]
+hub: long_detour_3 3 1 [color=orange max_drones=4]
+
+# --- THE BOTTLENECK CHOKEPOINT ---
+# Both paths merge here before the final stretch
+hub: choke_point 4 0 [color=red max_drones=2]
+
+# --- SPLIT 2: The Final Gauntlet ---
+# The chokepoint forces another split right before the finish line
+hub: lower_gate 5 -1 [color=yellow max_drones=1]
+hub: upper_gate 5 1  [color=yellow max_drones=2]
+
+end_hub: goal 6 0 [color=gold max_drones=4]
+
+# --- CONNECTIONS & TRAFFIC RULES ---
+
+# Fork 1: Short path vs Long detour
+# The connection to short_path_1 only allows 2 drones per turn. 
+# The remaining 2 drones ARE FORCED to take the long_detour to avoid waiting.
+connection: start-short_path_1 [max_link_capacity=2]
+connection: start-long_detour_1 [max_link_capacity=4]
+
+# Progressing through the routes
+connection: short_path_1-short_path_2 [max_link_capacity=2]
+connection: short_path_2-choke_point [max_link_capacity=2]
+
+connection: long_detour_1-long_detour_2 [max_link_capacity=4]
+connection: long_detour_2-long_detour_3 [max_link_capacity=4]
+connection: long_detour_3-choke_point  [max_link_capacity=4]
+
+# Fork 2: Exiting the Chokepoint
+# Even if drones try to sync up at the chokepoint, it can only hold 2 drones at a time.
+# Additionally, the path out of it splits into links that cannot handle all traffic.
+connection: choke_point-lower_gate [max_link_capacity=1]
+connection: choke_point-upper_gate [max_link_capacity=2]
+
+# Final home stretch
+connection: lower_gate-goal [max_link_capacity=1]
+connection: upper_gate-goal [max_link_capacity=2]

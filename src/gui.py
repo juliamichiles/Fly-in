@@ -10,7 +10,7 @@ class Vizualizer:
             self,
             graph: Graph,
             drones: list[Drone],
-            cell_size: int = 60,
+            cell_size: int = 120,
             padding: int = 100
     ) -> None:
 
@@ -26,15 +26,15 @@ class Vizualizer:
         }
 
         self.bg_color = (10, 16, 10) # Ultra-dark green/black
-        self.connect_color = (0, 50, 15)
+        self.connect_color = (51, 102, 0)
         self.drone_color = (255, 255, 255)
-    
+
         pygame.init()
         self.graph = graph
         self.drones = drones
         self.cell_size = cell_size
         self.padding = padding
-        self.font = pygame.font.SysFont("monospace", 14, bold=True)
+        self.font = pygame.font.SysFont("monospace", 18, bold=True)
 
         self.total_turns = max(len(d.history) for d in drones) if drones else 0
         self.current_turn = 0
@@ -50,15 +50,15 @@ class Vizualizer:
 
         # Fallback for 1D or small maps
         self.screen = pygame.display.set_mode(
-                (max(width, 400), max(height, 400)
-        ))
+                (max(width, 800), max(height, 600))
+        )
         pygame.display.set_caption("Fly-in")
         self.clock = pygame.time.Clock()
 
     def _to_screen_coords(self, x: int, y: int) -> tuple[int, int]:
         """Maps map coordinates to Pygame window pixels."""
-        screen_x = self.padding + + (x - self.min_x) * self.cell_size
-        screen_y = self.padding + + (y - self.min_y) * self.cell_size
+        screen_x = self.padding + (x - self.min_x) * self.cell_size
+        screen_y = self.padding + (y - self.min_y) * self.cell_size
         return screen_x, screen_y
 
     def draw(self):
@@ -74,14 +74,14 @@ class Vizualizer:
                 pos_u = self._to_screen_coords(u_x, u_y)
                 pos_v = self._to_screen_coords(v_x, v_y)
                 pygame.draw.line(
-                        self.screen, 
-                        self.connect_color, 
+                        self.screen,
+                        self.connect_color,
                         pos_u,
                         pos_v,
                         2)
         # Draw zones
         zone_occupants: dict[
-                str, 
+                str,
                 list[int]
         ] = {name: [] for name in self.graph.zones}
         for drone in self.drones:
@@ -98,10 +98,10 @@ class Vizualizer:
             # FIXME: change default color (above)
             rgb_color = self.color_map.get(color_str, self.color_map["none"])
             pygame.draw.circle(self.screen, rgb_color, (px, py), 18, 2)
-            
+
             lbl = self.font.render(name, True, self.connect_color)
             self.screen.blit(lbl, (px - lbl.get_width() // 2, py - 35))
-            
+
             occupants = zone_occupants[name]
             if occupants:
                 drone_txt = ",".join(str(d_id) for d_id in occupants)
@@ -109,18 +109,18 @@ class Vizualizer:
 
                 box_w, box_h = d_lbl.get_width() + 6, d_lbl.get_height() + 4
                 pygame.draw.rect(
-                        self.screen, 
-                        self.bg_color, 
+                        self.screen,
+                        self.bg_color,
                         (px - box_w // 2, py - box_h // 2, box_w, box_h)
                 )
                 pygame.draw.rect(
-                        self.screen, 
-                        self.color_map["green"], 
-                        (px - box_w // 2, py - box_h // 2, box_w, box_h), 
+                        self.screen,
+                        self.color_map["green"],
+                        (px - box_w // 2, py - box_h // 2, box_w, box_h),
                         1
                 )
                 self.screen.blit(
-                        d_lbl, 
+                        d_lbl,
                         (px - d_lbl.get_width() // 2, py - d_lbl.get_height() // 2)
                 )
         hud_txt = (
@@ -144,11 +144,12 @@ class Vizualizer:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT:
                         if self.current_turn < self.total_turns - 1:
-                            self.current_turn += 1 
-                        elif event.key == pygame.K_LEFT:
-                            if self.current_turn > 0:
-                                self.current_turn -= 1 
+                            self.current_turn += 1
+                    elif event.key == pygame.K_LEFT:
+                        if self.current_turn > 0:
+                            self.current_turn -= 1
             self.clock.tick(30)
-                                
+
+
 if __name__ == "__main__":
     ...

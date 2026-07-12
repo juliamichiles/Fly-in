@@ -51,12 +51,14 @@
 - [X] Notes on assign dones
 - [X] Implement simulation + notes on it 
 - [X] More notes on actual workflow of assign_drones and simulation
-- [ ] Actually test, with a bunch of different maps
+- [ ] More tests, with a bunch of different maps
 - [ ] Print more stages of the simulation - for testing purposes
-- [ ] Notes on simulation and ReservationTable
+- [X] Notes on simulation and ReservationTable
+- [ ] Doesn't comply with some requirements - fix it (see gemini)
 
 # GUI:
 - [X] Minimal vizualization - hard to read, needs fixing
+- [ ] Some of it doesn't match subject requirements - fix it 
 - [ ] take notes 
 
 # Later:
