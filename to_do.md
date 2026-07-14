@@ -54,7 +54,8 @@
 - [ ] More tests, with a bunch of different maps
 - [ ] Print more stages of the simulation - for testing purposes
 - [X] Notes on simulation and ReservationTable
-- [ ] Doesn't comply with some requirements - fix it (see gemini)
+- [ ] Doesn't comply with some requirements - partially fixed
+- [ ] Modify the rest of the code to match new mapf algorithm
 
 # GUI:
 - [X] Minimal vizualization - hard to read, needs fixing

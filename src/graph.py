@@ -61,10 +61,13 @@ class Graph:
         zone_md = self.zones[node]["metadata"].get("zone")
         return zone_md == "priority"
 
-    def zone_capacity(self, node) -> int:
+    def zone_capacity(self, node) -> int | float:
+        zone_type = self.zones[node].get("type")
+        if zone_type in ("start_hub", "end_hub"):
+            return float("inf")
         capacity = self.zones[node]["metadata"].get("max_drones", 1)
         return int(capacity)
-    
+
     def connection_capacity(self, a: str, b: str) -> int | float:
         for src, dst, metadata, _ in self.connections:
             if (src == a and dst == b) or \
@@ -73,12 +76,12 @@ class Graph:
                 return float("inf") if capacity is None else int(capacity)
         raise ConnectionError(f"No connection between {a} and {b}")
     
-    def get_end(self) -> str:
+    def get_end(self) -> str | None:
         for name, zone in self.zones.items():
             if zone["type"] == "end_hub":
                 return name
 
-    def get_start(self) -> str:
+    def get_start(self) -> str | None:
         for name, zone in self.zones.items():
             if zone["type"] == "start_hub":
                 return name

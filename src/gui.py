@@ -2,7 +2,11 @@
 from sys import exit
 from graph import Graph
 from mapf import Drone
-import pygame
+try:
+    import pygame
+except ImportError as e:
+    print(e)
+    sys.exit(1)  # not sure that's the best approach
 
 class Vizualizer:
 

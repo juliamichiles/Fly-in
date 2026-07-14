@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from graph import Graph
+from heapq import heappop, heappush
 import graph
 
 
@@ -42,6 +43,71 @@ class ReservationTable:
     
     def _edge_key(self, a: str, b: str, time: int) -> tuple[str, str, int]:
         return (min(a, b), max(a, b), time)
+
+
+class PathFinding:
+    # TODO: Merge scheduler into this class??
+
+    @staticmethod
+    def cooperative_dijkstra(
+            graph: Graph,
+            reservations: ReservationTable,
+            start: str,
+            end: str,
+            start_time: int = 0
+            ) -> tuple[list[str] | None, int]:
+        
+        # list of (path_weigt, time_cost, current_node, path_history)
+        to_explore = [(0.0, start_time, start, [])]
+        # tracks both node and time 
+        visited: set[tuple[str, int]] = set()
+        
+        while to_explore:
+            weight, time, node, path = heappop(to_explore)
+
+            if (node, time) in visited:
+                continue
+            visited.add((node, time))
+            current_path = path + [node]
+            if node == end:
+                return current_path, time
+
+            # drone waits in place, if that zone has free capacity at time + 1
+            if reservations.is_node_free(node, time + 1):
+                # Waiting adds 1.0 to weight (so moving forward is preferred)
+                # and 1 to time
+                heappush(to_explore, (weight + 1.0, time + 1, node, current_path))
+            for neighbor, move_cost, _ in graph.neighbors(node):
+                if graph.is_blocked(neighbor):
+                    continue
+                
+                time_elapsed = 2 if move_cost == 2 else 1 
+                if time_elapsed == 1:
+                    if reservations.is_edge_free(node, neighbor, time) and \
+                            reservations.is_node_free(neighbor, time + 1):
+                               # We add move_cost to weight, 
+                               # but exactly 1 to time
+                                heappush(to_explore, (
+                                    weight + move_cost, 
+                                    time + 1, neighbor, 
+                                    current_path
+                                    ))
+                    elif time_elapsed == 2:
+                        if reservations.is_edge_free(node, neighbor, time) and \
+                                reservations.is_node_free(neighbor, time + 2):
+                                    conn_name = f"{min(node, neighbor)}-"
+                                                f"{max(node, neighbor)}"
+                        dummy_path = current_path + [conn_name]
+                        # We add move_cost (2) to weight, and exactly 2 to time
+                        heappush(to_explore, (
+                            weight + move_cost, 
+                            time + 2, 
+                            neighbor, 
+                            dummy_path
+                            ))
+
+            return None, float("inf") # no path found
+
 
 class Scheduler:
     def __init__(self, graph: Graph) -> None:
