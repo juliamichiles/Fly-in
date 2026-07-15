@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from sys import exit
+import sys
 from graph import Graph
 from mapf import Drone
 try:
@@ -7,6 +7,7 @@ try:
 except ImportError as e:
     print(e)
     sys.exit(1)  # not sure that's the best approach
+
 
 class Vizualizer:
 
@@ -88,11 +89,16 @@ class Vizualizer:
                 str,
                 list[int]
         ] = {name: [] for name in self.graph.zones}
+        transit_occupants: dict[str, list[int]] = {}
+        
         for drone in self.drones:
             if self.current_turn < len(drone.history):
                 loc = drone.history[self.current_turn]
-                if loc and loc in zone_occupants:
-                    zone_occupants[loc].append(drone.id)
+                if loc:
+                    if "-" in loc:
+                        transit_occupants.setdefault(loc, []).append(drone.id)
+                    elif loc in zone_occupants:
+                        zone_occupants[loc].append(drone.id)
 
         for name, zone in self.graph.zones.items():
             x, y = int(zone["x"]), int(zone["y"])
@@ -127,13 +133,42 @@ class Vizualizer:
                         d_lbl,
                         (px - d_lbl.get_width() // 2, py - d_lbl.get_height() // 2)
                 )
+        # Draw transit zones
+        for conn, occupants in transit_occupants.items():
+            u, v = conn.split("-")
+            u_x, u_y = int(self.graph.zones[u]["x"]),\
+                    int(self.graph.zones[u]["y"])
+            v_x, v_y = int(self.graph.zones[v]["x"]),\
+                    int(self.graph.zones[v]["y"])
+            
+            # Calculate midle of connection 
+            px, py = self._to_screen_coords((u_x + v_x) / 2, (u_y + v_y) / 2)
+            
+            drone_txt = ",".join(str(d_id) for d_id in occupants)
+            d_lbl = self.font.render(drone_txt, True, self.drone_color)
+            box_w, box_h = d_lbl.get_width() + 6, d_lbl.get_height() + 4
+
+            pygame.draw.rect(
+                    self.screen, 
+                    self.bg_color, 
+                    (px - box_w // 2, py - box_h // 2, box_w, box_h)
+            )
+            pygame.draw.rect(
+                    self.screen, 
+                    self.color_map["yellow"], 
+                    (px - box_w // 2, py - box_h // 2, box_w, box_h), 
+                    1
+            )
+            self.screen.blit(
+                    d_lbl, 
+                    (px - d_lbl.get_width() // 2, py - d_lbl.get_height() // 2)
+            ) 
         hud_txt = (
                 f"TURN: {self.current_turn + 1}/{self.total_turns}"
                 "[Left/Right Arrow to Step]"
         )
         hud_lbl = self.font.render(hud_txt, True, self.color_map["green"])
         self.screen.blit(hud_lbl, (20, 20))
-
         pygame.display.flip()
 
     def run(self):

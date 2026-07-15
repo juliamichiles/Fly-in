@@ -21,10 +21,6 @@ class ReservationTable:
         self.node_reservations.setdefault((node, time), []).append(drone_id)
 
     def is_node_free(self, node: str, time: int) -> bool:
-        
-        if "-" in node:
-            return True
-
         capacity = self.graph.zone_capacity(node)
         current = self.node_reservations.get((node, time), [])
         return len(current) < capacity
@@ -53,19 +49,19 @@ class PathFinding:
     # TODO: Merge scheduler into this class??
 
     @staticmethod
-    def path_finding(
+    def cooperative_dijkstra(
             graph: Graph,
             reservations: ReservationTable,
             start: str,
             end: str,
             start_time: int = 0
-            ) -> tuple[list[str] | None, int | float]:
-
-        # list of (path_weight, time_cost, current_node, path_history)
+            ) -> tuple[list[str] | None, int]:
+        
+        # list of (path_weigt, time_cost, current_node, path_history)
         to_explore = [(0.0, start_time, start, [])]
-        # tracks both node and time
+        # tracks both node and time 
         visited: set[tuple[str, int]] = set()
-
+        
         while to_explore:
             weight, time, node, path = heappop(to_explore)
 
@@ -73,7 +69,6 @@ class PathFinding:
                 continue
             visited.add((node, time))
             current_path = path + [node]
-            
             if node == end:
                 return current_path, time
 
@@ -81,40 +76,37 @@ class PathFinding:
             if reservations.is_node_free(node, time + 1):
                 # Waiting adds 1.0 to weight (so moving forward is preferred)
                 # and 1 to time
-                heappush(
-                        to_explore, 
-                        (weight + 1.0, time + 1, node, current_path)
-                )
-                
+                heappush(to_explore, (weight + 1.0, time + 1, node, current_path))
             for neighbor, move_cost, _ in graph.neighbors(node):
                 if graph.is_blocked(neighbor):
                     continue
-
-                time_elapsed = 2 if move_cost == 2 else 1
+                
+                time_elapsed = 2 if move_cost == 2 else 1 
                 if time_elapsed == 1:
                     if reservations.is_edge_free(node, neighbor, time) and \
                             reservations.is_node_free(neighbor, time + 1):
-                        # adds move_cost to weight, but exactly 1 to time
-                        heappush(to_explore, (
-                            weight + move_cost,
-                            time + 1, 
-                            neighbor,
-                            current_path
-                        ))
-                elif time_elapsed == 2:
-                    if reservations.is_edge_free(node, neighbor, time) and \
-                            reservations.is_node_free(neighbor, time + 2):
-                        conn_name = f"{min(node, neighbor)}-{max(node, neighbor)}"
+                               # We add move_cost to weight, 
+                               # but exactly 1 to time
+                                heappush(to_explore, (
+                                    weight + move_cost, 
+                                    time + 1, neighbor, 
+                                    current_path
+                                    ))
+                    elif time_elapsed == 2:
+                        if reservations.is_edge_free(node, neighbor, time) and \
+                                reservations.is_node_free(neighbor, time + 2):
+                                    conn_name = f"{min(node, neighbor)}-"
+                                                f"{max(node, neighbor)}"
                         dummy_path = current_path + [conn_name]
-                        # adds move_cost (2) to weight, and exactly 2 to time
+                        # We add move_cost (2) to weight, and exactly 2 to time
                         heappush(to_explore, (
-                            weight + move_cost,
-                            time + 2,
-                            neighbor,
+                            weight + move_cost, 
+                            time + 2, 
+                            neighbor, 
                             dummy_path
-                        ))
+                            ))
 
-        return None, float("inf")
+            return None, float("inf") # no path found
 
 
 class Scheduler:
@@ -122,36 +114,44 @@ class Scheduler:
         self.graph = graph
         self.reservations = ReservationTable(graph)
 
-    def schedule(self, 
-                 nb_drones: int,
-                 start: str,
-                 end: str
-        ) -> list[Drone]:
-        
-        drones = []
-        
-        for i in range(1, nb_drones + 1):
-            path, cost = PathFinding.path_finding(
-                    self.graph, self.reservations, start, end, start_time=0
-                    )
-            if not path:
-                print(f"Warning: No path found for Drone {i} (Deadlock)")
-                # should I really print this? Or stop execution?
-                continue
+    def schedule(self, drones: list[Drone]) -> None:
+        active = True
+        time = 0
+
+        while active:
+            active = False
             
-            for time_tick, location in enumerate(path):
-                if "-" in location:
-                    u, v = location.split("-")
-                    self.reservations.reserve_edge(u, v, time_tick - 1, i)
-                    self.reservations.reserve_edge(u, v, time_tick, i)
+            for drone in drones:
+                next_pos = drone.position_index + 1
+                if next_pos >= len(drone.path):
+                    continue
+                active = True
+                if drone.position_index >= 0:
+                    current_node = drone.path[drone.position_index]
                 else:
-                    self.reservations.reserve_node(location, time_tick, i)
+                    current_node = None
+                next_node = drone.path[next_pos]
 
-            drone = Drone(i, path)
-            drone.history = path
-            drones.append(drone)
+                if not self.reservations.is_node_free(next_node, time):
+                    continue
+                if current_node is not None:
+                    if not self.reservations.is_edge_free(
+                            current_node, next_node, time
+                            ):
+                        continue
+                drone.position_index = next_pos
+                self.reservations.reserve_node(next_node, time, drone.id)
+                if current_node is not None:
+                    self.reservations.reserve_edge(
+                            current_node, next_node, time, drone.id
+                            )
+            for drone in drones:
+                if drone.position_index >= 0:
+                    drone.history.append(drone.path[drone.position_index])
+                else:
+                    drone.history.append(None)
 
-        return drones
+            time += 1
 
 if __name__ == "__main__":
     ...

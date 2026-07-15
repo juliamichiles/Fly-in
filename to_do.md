@@ -1,5 +1,12 @@
 # Next:
-- [ ] Create a new chat and start Visualization probably?
+- [ ] Ensure all subject requirements are matched now
+- [ ] A bunch of tests
+- [ ] Write more testing script
+- [ ] Decide stuff abt how makefile calls main.py 
+- [ ] Reestructure so that fly-in is a package
+- [ ] After everything is trully working, linters!!
+- [ ] NOTES on everything that changed recently
+- [X] Create a new chat and start Visualization probably?
     (give it all files so far for context)
 - [X] Update ReservationTable to handle capacities - see chat
     (Graph already has helper methods to get zone/connection capacities)
@@ -54,8 +61,7 @@
 - [ ] More tests, with a bunch of different maps
 - [ ] Print more stages of the simulation - for testing purposes
 - [X] Notes on simulation and ReservationTable
-- [ ] Doesn't comply with some requirements - partially fixed
-- [ ] Modify the rest of the code to match new mapf algorithm
+- [X] Modify the rest of the code to match new mapf algorithm
 
 # GUI:
 - [X] Minimal vizualization - hard to read, needs fixing
