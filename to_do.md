@@ -1,15 +1,18 @@
 # Next:
+- [ ] possibly has even more errors... see browser's chat
+- [ ] tui_simulation() possibly has issues (not printing connection name right)
+- [ ] algorithm might still be wrong... kkrying
+- [ ] Fix visualization: zone names are unreadable for large maps
 - [ ] Ensure all subject requirements are matched now
 - [ ] A bunch of tests
-- [ ] Write more testing script
-- [ ] Decide stuff abt how makefile calls main.py 
-- [ ] Reestructure so that fly-in is a package
+- [ ] Ensure terminal simulation is being printed correctly
+- [ ] Write a testing script that reads terminal simulation
 - [ ] After everything is trully working, linters!!
 - [ ] NOTES on everything that changed recently
-- [X] Create a new chat and start Visualization probably?
-    (give it all files so far for context)
-- [X] Update ReservationTable to handle capacities - see chat
-    (Graph already has helper methods to get zone/connection capacities)
+
+# IMPORTANT QUESTIONS:
+- How makefile runs main.py with/without a map?
+- Can I really have subdirectories? Or all my files must be loose in the root 
 
 # Parser:
 - Parses map file in a data structure and partially validates it so far
@@ -62,11 +65,15 @@
 - [ ] Print more stages of the simulation - for testing purposes
 - [X] Notes on simulation and ReservationTable
 - [X] Modify the rest of the code to match new mapf algorithm
+- [X] Update ReservationTable to handle capacities - see chat
+    (Graph already has helper methods to get zone/connection capacities)
 
 # GUI:
 - [X] Minimal vizualization - hard to read, needs fixing
 - [ ] Some of it doesn't match subject requirements - fix it 
 - [ ] take notes 
+- [X] Create a new chat and start Visualization probably?
+    (give it all files so far for context)
 
 # Later:
 - [X] Starrted visualization
@@ -88,6 +95,9 @@
 - [ ] Mypy + flake8
 - [ ] README
 - [ ] Re-name files, Reestructure them and maybe redistribute classes
+- [X] tui simulation
+- [X] fixed a bunch of subject missmatches
+- [X] new main file
 - Traffic simulation
 - Visualization
 - Makefile

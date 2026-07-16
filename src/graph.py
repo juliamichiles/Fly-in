@@ -68,12 +68,12 @@ class Graph:
         capacity = self.zones[node]["metadata"].get("max_drones", 1)
         return int(capacity)
 
-    def connection_capacity(self, a: str, b: str) -> int | float:
+    def connection_capacity(self, a: str, b: str) -> int:
         for src, dst, metadata, _ in self.connections:
             if (src == a and dst == b) or \
             (src == b and dst == a):
                 capacity = metadata.get("max_link_capacity")
-                return float("inf") if capacity is None else int(capacity)
+                return 1 if capacity is None else int(capacity)
         raise ConnectionError(f"No connection between {a} and {b}")
     
     def get_end(self) -> str | None:

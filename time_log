@@ -21,3 +21,4 @@
 12.07 - 4h00: notes + fixed some vizualization issues
 13.07 - 2h00: fixed mapf
 14.07 - 2h00: updated gui and main to match mapf
+16.07 - 5h00: generalized debugging + new main + implemented tui simulation

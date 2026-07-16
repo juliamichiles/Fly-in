@@ -11,6 +11,7 @@ class Drone:
         self.position_index = -1
         self.history: list[str | None] = []
 
+
 class ReservationTable:
     def __init__(self, graph: Graph) -> None:
         self.node_reservations: dict[tuple[str, int], list[int]] = {}
@@ -50,7 +51,6 @@ class ReservationTable:
 
 
 class PathFinding:
-    # TODO: Merge scheduler into this class??
 
     @staticmethod
     def path_finding(
@@ -105,9 +105,14 @@ class PathFinding:
                             current_path
                         ))
                 elif time_elapsed == 2:
-                    if reservations.is_edge_free(node, neighbor, time) and \
-                            reservations.is_node_free(neighbor, time + 2):
-                        conn_name = f"{min(node, neighbor)}-{max(node, neighbor)}"
+                    free_0 = reservations.is_edge_free(node, neighbor, time)
+                    free_1 = reservations.is_edge_free(node, neighbor, time + 1)
+                    free_2 = reservations.is_edge_free(node, neighbor, time + 2)
+                    if free_0 and free_1 and free_2:
+                        conn_name = (
+                                f"{min(node, neighbor)}-"
+                                f"{max(node, neighbor)}"
+                        )
                         dummy_path = current_path + [conn_name]
                         # adds move_cost (2) to weight, and exactly 2 to time
                         heappush(to_explore, (
@@ -141,7 +146,6 @@ class Scheduler:
                 print(f"Warning: No path found for Drone {i} (Deadlock)")
                 # should I really print this? Or stop execution?
                 continue
-            
             for time_tick, location in enumerate(path):
                 if "-" in location:
                     u, v = location.split("-")
@@ -149,12 +153,47 @@ class Scheduler:
                     self.reservations.reserve_edge(u, v, time_tick, i)
                 else:
                     self.reservations.reserve_node(location, time_tick, i)
-
+                    # Reserve normal 1-turn transitions
+                    if time_tick > 0:
+                        prev_location = path[time_tick - 1]
+                        if "-" not in prev_location:
+                            self.reservations.reserve_edge(
+                                    prev_location, 
+                                    location, 
+                                    time_tick - 1, 
+                                    i
+                            )
+                                
             drone = Drone(i, path)
             drone.history = path
             drones.append(drone)
 
         return drones
+
+    @staticmethod
+    def tui_simulation(drones: list[Drone], end_hub: str) -> None:
+        if not drones:
+            return
+
+        total_turns = max(len(d.history) for d in drones)
+
+        for t in range(1, total_turns):
+            turn_moves = []
+            for d in drones:
+                
+                if t >= len(d.history):
+                    continue
+                
+                prev_loc = d.history[t - 1]
+                curr_loc = d.history[t]
+                
+                if prev_loc == end_hub:
+                    continue
+                if curr_loc != prev_loc:
+                    turn_moves.append(f"D{d.id}-{curr_loc}")
+            if turn_moves:
+                print(" ".join(turn_moves))
+
 
 if __name__ == "__main__":
     ...

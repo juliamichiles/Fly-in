@@ -2,13 +2,13 @@
 import sys
 from graph import Graph
 from mapf import Drone
+from errors import VizualizationError
 try:
     import os
     os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
     import pygame
-except ImportError as e:
-    print(e)
-    sys.exit(1)  # not sure that's the best approach
+except (ImportError, ModuleNotFoundError) as e:
+    raise VizualizationError(e)
 
 
 class Vizualizer:
@@ -21,24 +21,11 @@ class Vizualizer:
             padding: int = 100
     ) -> None:
 
-        self.color_map = {
-            # TODO: add more colors
-            # later handle unknown color as default (white?)
-            "green": (0, 255, 65),
-            "blue": (0, 150, 255),
-            "red": (255, 50, 50),
-            "yellow": (240, 240, 50),
-            "grey": (100, 100, 100),
-            "none": (200, 200, 200)
-        }
-
         self.bg_color = (10, 16, 10) # Ultra-dark green/black
         self.connect_color = (51, 102, 0)
         self.drone_color = (255, 255, 255)
         
-        print("REMOVEME: before pygame.init()")
         pygame.init()
-        print("REMOVEME: after pygame.init()")
         self.graph = graph
         self.drones = drones
         self.cell_size = cell_size
@@ -58,13 +45,17 @@ class Vizualizer:
         height = (self.max_y - self.min_y) * cell_size + (padding * 2)
 
         # Fallback for 1D or small maps
-        print("REMOVEME: before pygame.display.set_mode()")
         self.screen = pygame.display.set_mode(
                 (max(width, 800), max(height, 600))
         )
-        print("REMOVEME: after pygame.display.set_mode()")
         pygame.display.set_caption("Fly-in")
         self.clock = pygame.time.Clock()
+
+    def _get_color(self, color_str: str) -> tuple[int, int, int]:
+        try:
+            return tuple(pygame.Color(color_str))[:3]
+        except (ValueError, TypeError):
+            return (200, 200, 200)  # grey as default
 
     def _to_screen_coords(self, x: int, y: int) -> tuple[int, int]:
         """Maps map coordinates to Pygame window pixels."""
@@ -112,7 +103,7 @@ class Vizualizer:
 
             color_str = zone["metadata"].get("color", "none")
             # FIXME: change default color (above)
-            rgb_color = self.color_map.get(color_str, self.color_map["none"])
+            rgb_color = self._get_color(color_str)
             pygame.draw.circle(self.screen, rgb_color, (px, py), 18, 2)
 
             lbl = self.font.render(name, True, self.connect_color)
@@ -131,7 +122,7 @@ class Vizualizer:
                 )
                 pygame.draw.rect(
                         self.screen,
-                        self.color_map["green"],
+                        self._get_color("green"),
                         (px - box_w // 2, py - box_h // 2, box_w, box_h),
                         1
                 )
@@ -155,13 +146,13 @@ class Vizualizer:
             box_w, box_h = d_lbl.get_width() + 6, d_lbl.get_height() + 4
 
             pygame.draw.rect(
-                    self.screen, 
-                    self.bg_color, 
+                        self.screen, 
+                        self.bg_color, 
                     (px - box_w // 2, py - box_h // 2, box_w, box_h)
             )
             pygame.draw.rect(
                     self.screen, 
-                    self.color_map["yellow"], 
+                    self._get_color("yellow"), 
                     (px - box_w // 2, py - box_h // 2, box_w, box_h), 
                     1
             )
@@ -173,7 +164,7 @@ class Vizualizer:
                 f"TURN: {self.current_turn + 1}/{self.total_turns}"
                 "[Left/Right Arrow to Step]"
         )
-        hud_lbl = self.font.render(hud_txt, True, self.color_map["green"])
+        hud_lbl = self.font.render(hud_txt, True, self._get_color("green"))
         self.screen.blit(hud_lbl, (20, 20))
         pygame.display.flip()
 
