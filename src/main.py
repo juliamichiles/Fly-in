@@ -24,10 +24,11 @@ def main():
     filename = sys.argv[1]
 
     try:
+        print("[1] Loading and validating map...")
         parser = Parser(filename)
         map_info = parser.parse_map()
 
-        print("✔ Map parsed successfully")
+        print("Map parsed successfully")
         print_map(map_info)
 
         print("\n=== BUILDING GRAPH ===")
@@ -39,6 +40,7 @@ def main():
         print(f"Start: {start}")
         print(f"End:   {end}")
 
+        print("[2] Running Multi-Agent Scheduler...")
         pf = PathFinding()
         print("\n=== MAPF SCHEDULING ===")
         scheduler = Scheduler(graph)
@@ -48,6 +50,7 @@ def main():
             print(f"Drone {d.id} Path: {d.history}")
 
         print("\n=== SIMULATION ===")
+        print("[3] Launching Pygame...")
         viz = Vizualizer(graph, drones)
         viz.run()
 

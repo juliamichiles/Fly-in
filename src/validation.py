@@ -11,6 +11,7 @@ class Validation:
         end_count = 0
         start_count = 0
         valid_types = {"normal", "blocked", "restricted", "priority"}
+        allowed_metadata_keys = {"zone", "max_drones", "color"}
 
         for _, zone in zones.items():
 
@@ -33,9 +34,15 @@ class Validation:
                 )
 
             if metadata:
-
-                if "type" in metadata:
-                    value = metadata["type"]
+                for key in metadata:
+                    if key not in allowed_metadata_keys:
+                        raise MapError(
+                            f"[line {line}] Invalid metadata key '{key}' "
+                            "for zone.\nAllowed keys:"
+                            "'zone', 'max_drones' 'color'"
+                        )
+                if "zone" in metadata:
+                    value = metadata["zone"]
                     if value not in valid_types:
                         raise MapError(
                                 f"[line {line}] Invalid zone type '{value}'")
@@ -53,11 +60,6 @@ class Validation:
                     if not value.isalpha():
                         raise MapError(
                                 f"[line {line}] Invalid color '{value}'")
-                else:
-                    # not sure if I should raise an exeption or just ignore
-                    raise MapError(
-                            f"[line {line}] Invalid metadata"
-                    )
         if start_count == 0 or end_count == 0:
             raise MapError(
                     "[invalid map file] Missing end_hub or start_hub"

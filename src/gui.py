@@ -3,6 +3,8 @@ import sys
 from graph import Graph
 from mapf import Drone
 try:
+    import os
+    os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
     import pygame
 except ImportError as e:
     print(e)
@@ -33,8 +35,10 @@ class Vizualizer:
         self.bg_color = (10, 16, 10) # Ultra-dark green/black
         self.connect_color = (51, 102, 0)
         self.drone_color = (255, 255, 255)
-
+        
+        print("REMOVEME: before pygame.init()")
         pygame.init()
+        print("REMOVEME: after pygame.init()")
         self.graph = graph
         self.drones = drones
         self.cell_size = cell_size
@@ -54,9 +58,11 @@ class Vizualizer:
         height = (self.max_y - self.min_y) * cell_size + (padding * 2)
 
         # Fallback for 1D or small maps
+        print("REMOVEME: before pygame.display.set_mode()")
         self.screen = pygame.display.set_mode(
                 (max(width, 800), max(height, 600))
         )
+        print("REMOVEME: after pygame.display.set_mode()")
         pygame.display.set_caption("Fly-in")
         self.clock = pygame.time.Clock()
 

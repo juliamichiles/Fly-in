@@ -65,10 +65,13 @@ class PathFinding:
         to_explore = [(0.0, start_time, start, [])]
         # tracks both node and time
         visited: set[tuple[str, int]] = set()
+        time_limit = 1000
 
         while to_explore:
             weight, time, node, path = heappop(to_explore)
 
+            if time > time_limit:
+                break
             if (node, time) in visited:
                 continue
             visited.add((node, time))

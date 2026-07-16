@@ -17,7 +17,7 @@ class Graph:
         self.graph = self._build_graph(connections)
 
     @staticmethod
-    def _get_cost(zone) -> float | None:
+    def _get_cost(zone: dict[str, object]) -> float | None:
         # cost depends on the destination node, not the connection.
         zone_type = zone["metadata"].get("zone", "normal")
 
@@ -46,22 +46,22 @@ class Graph:
                 graph[hub_b].append((hub_a, cost_to_a, metadata))
         return graph
 
-    def neighbors(self, node) -> list[tuple]:
+    def neighbors(self, node: str) -> list[tuple]:
         return self.graph[node]
 
-    def is_blocked(self, node) -> bool:
+    def is_blocked(self, node: str) -> bool:
         zone_md = self.zones[node]["metadata"].get("zone") 
         return zone_md == "blocked"
 
-    def is_restricted(self, node) -> bool:
+    def is_restricted(self, node: str) -> bool:
         zone_md = self.zones[node]["metadata"].get("zone")
         return zone_md == "restricted"
 
-    def is_priority(self, node) -> bool:
+    def is_priority(self, node: str) -> bool:
         zone_md = self.zones[node]["metadata"].get("zone")
         return zone_md == "priority"
 
-    def zone_capacity(self, node) -> int | float:
+    def zone_capacity(self, node: str) -> int | float:
         zone_type = self.zones[node].get("type")
         if zone_type in ("start_hub", "end_hub"):
             return float("inf")
