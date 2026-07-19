@@ -24,15 +24,16 @@ def main() -> None:
 
         scheduler = Scheduler(graph)
         drones = scheduler.schedule(map_info.nb_drones, start, end)
-        scheduler.tui_simulation(drones, end) 
+        scheduler.simulation_log(drones, end) 
 
-    except MapError as e:
-        print(f"Map error: {e}")
-    try:     
         from gui import Vizualizer
         
         viz = Vizualizer(graph, drones)
         viz.run()
+
+    except MapError as e:
+        print(f"Map error: {e}")
+
     except VizualizationError as e:
         print("[WARNING] GUI Vizualizer currently unavaliable.")
         print(f"VizualizationError: {e}")

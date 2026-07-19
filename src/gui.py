@@ -100,12 +100,13 @@ class Vizualizer:
         for name, zone in self.graph.zones.items():
             x, y = int(zone["x"]), int(zone["y"])
             px, py = self._to_screen_coords(x, y)
-
+            
             color_str = zone["metadata"].get("color", "none")
-            # FIXME: change default color (above)
             rgb_color = self._get_color(color_str)
             pygame.draw.circle(self.screen, rgb_color, (px, py), 18, 2)
 
+            if len(name) > 10:
+                name = name[:10]
             lbl = self.font.render(name, True, self.connect_color)
             self.screen.blit(lbl, (px - lbl.get_width() // 2, py - 35))
 

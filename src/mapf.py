@@ -107,7 +107,7 @@ class PathFinding:
                 elif time_elapsed == 2:
                     free_0 = reservations.is_edge_free(node, neighbor, time)
                     free_1 = reservations.is_edge_free(node, neighbor, time + 1)
-                    free_2 = reservations.is_edge_free(node, neighbor, time + 2)
+                    free_2 = reservations.is_node_free(neighbor, time + 2)
                     if free_0 and free_1 and free_2:
                         conn_name = (
                                 f"{min(node, neighbor)}-"
@@ -171,7 +171,7 @@ class Scheduler:
         return drones
 
     @staticmethod
-    def tui_simulation(drones: list[Drone], end_hub: str) -> None:
+    def simulation_log(drones: list[Drone], end_hub: str) -> None:
         if not drones:
             return
 
