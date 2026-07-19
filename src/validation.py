@@ -64,7 +64,7 @@ class Validation:
             raise MapError(
                     "[invalid map file] Missing end_hub or start_hub"
                     )
-        
+
         start = None
         end = None
 
@@ -105,7 +105,7 @@ class Validation:
             seen.add(key)
 
             if zone_a == zone_b:
-                 raise MapError(f"[line {line}] Self-connection is invalid")
+                raise MapError(f"[line {line}] Self-connection is invalid")
 
             if metadata:
                 value = metadata["max_link_capacity"]

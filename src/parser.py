@@ -2,11 +2,12 @@
 from errors import MapError
 from map_data import Map
 from validation import Validation
-import re 
+import re
+
 
 class Parser:
-    
-    # FIXME: Can I have this uppercase variables? 
+
+    # FIXME: Can I have this uppercase variables?
     DRONE_PAT = re.compile(r"^nb_drones:\s*(\d+)$")
     # Matches: <type>: <name> <x> <y> [metadata]
     # Captures: type, name, x, y, and optional metadata string
@@ -16,7 +17,7 @@ class Parser:
         r"(-?\d+)\s+"                    # x
         r"(-?\d+)"                       # y
         r"(?:\s*\[(.*)\])?$"             # optional metadata
-    ) 
+    )
     # Matches: connection: <name>-<name> [metadata]
     # Captures: node_a, node_b, and optional metadata string
     CONN_PAT = re.compile(
@@ -29,7 +30,7 @@ class Parser:
 
         self.filename: str = filename
         self.lines: list[tuple[int, str]] = []
-        
+
     def _clean_map(self) -> list[tuple[int, str]]:
 
         try:
@@ -77,7 +78,7 @@ class Parser:
                     f"[line {n}]: Invalid zone syntax"
                     "Expected '<hub_type>: <name> <x> <y> [metadata]'"
             )
-        
+
         hub_type, name, x_str, y_str, md_str = match.groups()
         metadata = self._parse_metadata(md_str)
         return name, {
@@ -94,7 +95,7 @@ class Parser:
             dict[str, str],
             int
             ]:
-    
+
         match = self.CONN_PAT.match(line)
         if not match:
             raise MapError(
@@ -109,12 +110,12 @@ class Parser:
     def _parse_metadata(self, md_str: str) -> dict[str, str]:
 
         metadata = {}
-        
+
         if not md_str:
             return metadata
 
         tokens = md_str.strip().split()
-        
+
         for token in tokens:
             match = self.META_PAT.match(token)
             if not match:
@@ -167,14 +168,18 @@ class Parser:
                             " to unknown zone!")
                 connections.append(connection)
 
-            elif not line.startswith(
-                    ("nb_drones:", "hub:", "start_hub:", "end_hub:", "connection:")
-                    ):
+            elif not line.startswith((
+                "nb_drones:",
+                "hub:",
+                "start_hub:",
+                "end_hub:",
+                "connection:"
+            )):
                 raise MapError(f"[line {line_num}] unknown syntax")
-            
+
         if not connections:
             raise MapError(
-                    f"[invalid map file] map must have connections"
+                    "[invalid map file] map must have connections"
             )
 
         map_info = Map(nb_drones, zones, connections)

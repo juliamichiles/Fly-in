@@ -48,10 +48,10 @@ def main():
 
     except MapError as e:
         print(f"Map error: {e}")
-    try:     
+    try:
         print("\n=== SIMULATION ===")
         from gui import Vizualizer
-        
+
         viz = Vizualizer(graph, drones)
         viz.run()
     except VizualizationError as e:

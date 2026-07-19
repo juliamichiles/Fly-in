@@ -1,11 +1,10 @@
 # Next:
-- [ ] possibly has even more errors... see browser's chat
-- [ ] tui_simulation() possibly has issues (not printing connection name right)
+- [ ] 02_circular_loop map takes 16 turns (expected <= 16)
+- [ ] fix Makefile
+- [ ] Move all files to the rootof the repo
 - [ ] algorithm might still be wrong... kkrying
-- [ ] Fix visualization: zone names are unreadable for large maps
 - [ ] Ensure all subject requirements are matched now
 - [ ] A bunch of tests
-- [ ] Ensure terminal simulation is being printed correctly
 - [ ] Write a testing script that reads terminal simulation
 - [ ] After everything is trully working, linters!!
 - [ ] NOTES on everything that changed recently
@@ -13,6 +12,12 @@
 # IMPORTANT QUESTIONS:
 - How makefile runs main.py with/without a map?
 - Can I really have subdirectories? Or all my files must be loose in the root 
+
+# Fixed:
+- [X] possibly has even more errors... see browser's chat
+- [X] simulation_log() possibly has issues (not printing connection name right)
+- [X] Fix visualization: zone names are unreadable for large maps
+- [X] Ensure terminal simulation is being printed correctly
 
 # Parser:
 - Parses map file in a data structure and partially validates it so far

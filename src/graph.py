@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
-from map_data import Map
 from errors import ConnectionError
-# TODO: add typehints
 
 
 class Graph:
-    
-    #TODO: Do I really need all those methods? Ensure they were used or remove
 
     def __init__(self,
                  zones: dict[str, dict[str, object]],
@@ -14,7 +10,19 @@ class Graph:
                  ) -> None:
         self.zones = zones
         self.connections = connections
+        self.connection_info = {
+            (min(a, b), max(a, b)): metadata
+            for a, b, metadata, _ in connections
+        }
+        self.connection_names = {}
+        for a, b, _, _ in connections:
+            og_name = f"{a}-{b}"
+            self.connection_names[(a, b)] = og_name
+            self.connection_names[(b, a)] = og_name
         self.graph = self._build_graph(connections)
+
+    def get_connection_name(self, a: str, b: str) -> str:
+        return self.connection_names.get((a, b), f"{a}-{b}")
 
     @staticmethod
     def _get_cost(zone: dict[str, object]) -> float | None:
@@ -28,13 +36,13 @@ class Graph:
         elif zone_type == "priority":
             return 0.9
         else:
-            return 1.0 
+            return 1.0
 
     def _build_graph(
-            self, 
+            self,
             connections: list[tuple[str, str, dict[str, str], int]]
             ) -> dict[str, list[tuple[str, int, dict[str, str]]]]:
-        
+
         graph = {name: [] for name in self.zones}
 
         for hub_a, hub_b, metadata, _ in connections:
@@ -50,7 +58,7 @@ class Graph:
         return self.graph[node]
 
     def is_blocked(self, node: str) -> bool:
-        zone_md = self.zones[node]["metadata"].get("zone") 
+        zone_md = self.zones[node]["metadata"].get("zone")
         return zone_md == "blocked"
 
     def is_restricted(self, node: str) -> bool:
@@ -69,13 +77,13 @@ class Graph:
         return int(capacity)
 
     def connection_capacity(self, a: str, b: str) -> int:
-        for src, dst, metadata, _ in self.connections:
-            if (src == a and dst == b) or \
-            (src == b and dst == a):
-                capacity = metadata.get("max_link_capacity")
-                return 1 if capacity is None else int(capacity)
-        raise ConnectionError(f"No connection between {a} and {b}")
-    
+        key = (min(a, b), max(a, b))
+        try:
+            metadata = self.connection_info[key]
+        except KeyError:
+            raise ConnectionError(f"No connection between {a} and {b}")
+        return int(metadata.get("max_link_capacity", 1))
+
     def get_end(self) -> str | None:
         for name, zone in self.zones.items():
             if zone["type"] == "end_hub":

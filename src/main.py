@@ -3,11 +3,11 @@ import sys
 from parser import Parser
 from errors import MapError, VizualizationError
 from graph import Graph
-from mapf import Drone, Scheduler, PathFinding
+from mapf import Scheduler
 
 
 def main() -> None:
-    
+
     if len(sys.argv) < 2:
         print("Usage: ./main.py <map_file> [k_paths]")
         return
@@ -24,10 +24,10 @@ def main() -> None:
 
         scheduler = Scheduler(graph)
         drones = scheduler.schedule(map_info.nb_drones, start, end)
-        scheduler.simulation_log(drones, end) 
+        scheduler.simulation_log(drones, end)
 
         from gui import Vizualizer
-        
+
         viz = Vizualizer(graph, drones)
         viz.run()
 
