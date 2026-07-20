@@ -23,3 +23,4 @@
 14.07 - 2h00: updated gui and main to match mapf
 16.07 - 5h00: generalized debugging + new main + implemented tui simulation
 19.07 - 4h00: generalized debugging + flake8 + tests
+20.07 - 2h30: minor GUI fix + added new maps for testing

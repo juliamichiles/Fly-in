@@ -1,0 +1,27 @@
+# Special Case 1: Wide Highway vs Narrow Shortcut
+# What it tests: Does your algorithm greedily shove all drones into the shortest 
+# path, or can it realize that a longer path with massive capacity is actually 
+# faster for a large group?
+
+# Expected Benchmark: 4 turns. 
+# (If your algorithm greedily takes the fast path, it will take 11 turns to move 
+# all 10 drones one by one. By using the longer "highway", all drones can move 
+# simultaneously and finish in 4 turns).
+nb_drones: 10
+
+start_hub: start 0 0 [color=green]
+hub: shortcut 2 0 [color=blue max_drones=1]
+hub: highway1 1 1 [color=cyan max_drones=10]
+hub: highway2 2 1 [color=cyan max_drones=10]
+hub: highway3 3 1 [color=cyan max_drones=10]
+end_hub: goal 4 0 [color=red]
+
+# The shortcut is only 2 steps, but can only take 1 drone at a time
+connection: start-shortcut [max_link_capacity=1]
+connection: shortcut-goal [max_link_capacity=1]
+
+# The highway is 4 steps, but can take the entire swarm at once
+connection: start-highway1 [max_link_capacity=10]
+connection: highway1-highway2 [max_link_capacity=10]
+connection: highway2-highway3 [max_link_capacity=10]
+connection: highway3-goal [max_link_capacity=10]

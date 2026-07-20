@@ -162,7 +162,7 @@ class Vizualizer:
                     (px - d_lbl.get_width() // 2, py - d_lbl.get_height() // 2)
             )
         hud_txt = (
-                f"TURN: {self.current_turn + 1}/{self.total_turns}"
+                f"TURN: {self.current_turn}/{self.total_turns - 1}"
                 "[Left/Right Arrow to Step]"
         )
         hud_lbl = self.font.render(hud_txt, True, self._get_color("green"))

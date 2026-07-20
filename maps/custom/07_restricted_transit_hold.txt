@@ -1,0 +1,22 @@
+# Special Case 3: Restricted Zone Connection Occupancy
+nb_drones: 2
+# What it tests: This isolates the trickiest rule in the subject: movement to a 
+# restricted zone costs 2 turns, and the drone occupies the connection during 
+# transit without waiting. It also tests the rule that a drone moving out of a 
+# zone frees up capacity for that same turn.
+# Expected Benchmark: 4 turns
+# Turn 1: Drone 1 enters the connection. Drone 2 must wait because if it entered,
+# it would arrive on Turn 2, but Drone 1 will be occupying the r1 zone on Turn 2.
+# Turn 2: Drone 1 arrives at r1. Drone 2 enters the connection 
+# (since Drone 1 will leave r1 on Turn 3, freeing up space on that exact turn).
+# Turn 3: Drone 1 arrives at goal. Drone 2 arrives at r1.
+# Turn 4: Drone 2 arrives at goal.
+
+start_hub: start 0 0 [color=green]
+hub: r1 2 0 [zone=restricted color=orange max_drones=1]
+end_hub: goal 4 0 [color=red]
+
+# Link capacity is 2, but the destination capacity is 1
+# This forces the algorithm to stagger the drones perfectly
+connection: start-r1 [max_link_capacity=2]
+connection: r1-goal [max_link_capacity=1]

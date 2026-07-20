@@ -1,0 +1,19 @@
+# Special Case 6: The Zipper Merge
+nb_drones: 6
+# What it tests: Drones coming from two separate paths must "zipper merge" into a 
+# single capacity-1 bottleneck. If reservation table handles time steps 
+# correctly, the drones should alternate perfectly without any of them stalling 
+# for multiple turns at the junction.
+# Expected Benchmark: 8 turns
+
+start_hub: start 0 0 [color=green]
+hub: upper_lane1 1 1 [color=blue max_drones=3]
+hub: lower_lane1 1 -1 [color=blue max_drones=3]
+hub: merge_junction 3 0 [color=orange max_drones=1]
+end_hub: goal 5 0 [color=red]
+
+connection: start-upper_lane1 [max_link_capacity=3]
+connection: start-lower_lane1 [max_link_capacity=3]
+connection: upper_lane1-merge_junction [max_link_capacity=1]
+connection: lower_lane1-merge_junction [max_link_capacity=1]
+connection: merge_junction-goal [max_link_capacity=1]

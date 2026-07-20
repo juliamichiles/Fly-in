@@ -1,0 +1,25 @@
+# Special Case 5: The Great Gridlock
+nb_drones: 6
+# This is a larger, multi-stage version of the restricted pipeline. 
+# It features intersecting restricted paths with tiny capacities. 
+# If the algorithm doesn't properly clear reservation slots dynamically when 
+# zones open up, this map will cause cascading deadlocks.
+# Expected Benchmark: 9 turns.
+
+start_hub: start 0 0 [color=green]
+hub: choice_a 1 1 [color=blue max_drones=3]
+hub: choice_b 1 -1 [color=blue max_drones=3]
+hub: res_stretch1 3 1 [zone=restricted color=orange max_drones=1]
+hub: res_stretch2 3 -1 [zone=restricted color=orange max_drones=1]
+hub: interchange 5 0 [color=yellow max_drones=2]
+hub: final_res 6 0 [zone=restricted color=purple max_drones=2]
+end_hub: goal 8 0 [color=red]
+
+connection: start-choice_a [max_link_capacity=3]
+connection: start-choice_b [max_link_capacity=3]
+connection: choice_a-res_stretch1 [max_link_capacity=1]
+connection: choice_b-res_stretch2 [max_link_capacity=1]
+connection: res_stretch1-interchange [max_link_capacity=1]
+connection: res_stretch2-interchange [max_link_capacity=1]
+connection: interchange-final_res [max_link_capacity=2]
+connection: final_res-goal [max_link_capacity=2]

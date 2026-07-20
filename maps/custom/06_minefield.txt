@@ -1,0 +1,33 @@
+# Special Case 2: Blocked Zone Minefield
+nb_drones: 3
+# What it tests: Proper handling of blocked zones. The rules state that a blocked 
+# zone is inaccessible and cannot be entered. Your current maps use color=red or 
+# dead ends to simulate bad paths, but explicitly using zone=blocked ensures your 
+# graph building and pathfinding completely sever those nodes from the navigable graph.
+# Expected Benchmark: 6 turns. (The path is exactly 4 steps long, but since 
+# capacity is 1 everywhere, the 3 drones must travel single-file)
+
+start_hub: start 0 0 [color=green]
+hub: blocked1 1 0 [zone=blocked color=gray]
+hub: blocked2 2 0 [zone=blocked color=gray]
+hub: blocked3 3 0 [zone=blocked color=gray]
+hub: safe_path1 1 1 [zone=priority color=blue]
+hub: safe_path2 2 1 [color=blue]
+hub: safe_path3 3 1 [zone=priority color=blue]
+end_hub: goal 4 0 [color=red]
+
+# Direct path is completely blocked
+connection: start-blocked1
+connection: blocked1-blocked2
+connection: blocked2-blocked3
+connection: blocked3-goal
+
+# The only valid way around
+connection: start-safe_path1
+connection: safe_path1-safe_path2
+connection: safe_path2-safe_path3
+connection: safe_path3-goal
+
+# Sneaky cross-connections that must be ignored
+connection: blocked2-safe_path2
+connection: safe_path1-blocked1

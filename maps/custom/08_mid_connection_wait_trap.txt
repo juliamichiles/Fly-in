@@ -1,0 +1,17 @@
+# Special Case 4: Mid-Connection Wait Trap
+nb_drones: 2
+# This map forces a drone into a restricted zone but blocks the exit. 
+# Since the subject states: "It can't wait extra turns on the connection. 
+# It cannot wait on the connection for an empty space in the destination zone," 
+# the scheduler  must force the second drone to wait at start, rather than 
+# entering the connection and stopping mid-way
+# Expected Benchmark: 6 turns.
+
+start_hub: start 0 0 [color=green]
+hub: r_tunnel 2 0 [zone=restricted color=orange max_drones=1]
+hub: bottleneck 4 0 [color=yellow max_drones=1]
+end_hub: goal 6 0 [color=red]
+
+connection: start-r_tunnel [max_link_capacity=1]
+connection: r_tunnel-bottleneck [max_link_capacity=1]
+connection: bottleneck-goal [max_link_capacity=1]

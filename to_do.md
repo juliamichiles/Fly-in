@@ -1,5 +1,5 @@
 # Next:
-- [ ] 02_circular_loop map takes 16 turns (expected <= 16)
+- [ ] run test_parser! Its passing a few invalid maps
 - [ ] fix Makefile
 - [ ] Move all files to the rootof the repo
 - [ ] algorithm might still be wrong... kkrying
@@ -12,8 +12,10 @@
 # IMPORTANT QUESTIONS:
 - How makefile runs main.py with/without a map?
 - Can I really have subdirectories? Or all my files must be loose in the root 
+- Should I have python 3.10^ in my requirements?
 
 # Fixed:
+- [X] GUI was counting an extra turn
 - [X] possibly has even more errors... see browser's chat
 - [X] simulation_log() possibly has issues (not printing connection name right)
 - [X] Fix visualization: zone names are unreadable for large maps
