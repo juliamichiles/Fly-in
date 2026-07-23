@@ -2,9 +2,13 @@ class MapError(Exception):
     ...
 
 
+class PathError(Exception):
+    ...
+
+
 class ConnectionError(Exception):
     ...
 
 
-class VizualizationError(Exception):
+class VisualizationError(Exception):
     ...

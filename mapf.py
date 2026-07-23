@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from graph import Graph
 from heapq import heappop, heappush
+from errors import PathError
 
 
 class Drone:
@@ -8,7 +9,7 @@ class Drone:
         self.id = drone_id
         self.path = path
         self.position_index = -1
-        self.history: list[str | None] = []
+        self.history: list[str] = []
 
 
 class ReservationTable:
@@ -61,7 +62,13 @@ class PathFinding:
             ) -> tuple[list[str] | None, int | float]:
 
         # list of (path_weight, time_cost, current_node, path_history)
-        to_explore = [(0.0, start_time, start, [])]
+        to_explore: list[tuple[
+            float,
+            int,
+            str,
+            list[str]
+            ]] = [(0.0, start_time, start, [])]
+
         # tracks both node and time
         visited: set[tuple[str, int]] = set()
         time_limit = 1000
@@ -144,9 +151,7 @@ class Scheduler:
                     self.graph, self.reservations, start, end, start_time=0
                     )
             if not path:
-                print(f"Warning: No path found for Drone {i} (Deadlock)")
-                # should I really print this? Or stop execution?
-                continue
+                raise PathError(f"No path found for Drone {i} (Deadlock)")
             for time_tick, location in enumerate(path):
                 if "-" in location:
                     u, v = location.split("-")
@@ -196,6 +201,31 @@ class Scheduler:
                 # print(f"turn: {t}")
                 print(" ".join(turn_moves))
         # print(f"total_turns: {total_turns}")
+
+    @staticmethod
+    def print_statistics(drones: list[Drone], end_hub: str) -> None:
+        if not drones:
+            return
+
+        print("\n --- Performance Statistics ---")
+        print("------------------------------")
+        total_sim_turns = max(len(d.history) for d in drones) - 1
+        if total_sim_turns <= 0:
+            return
+
+        total_drone_turns = sum(len(d.history) - 1 for d in drones)
+        avg_turns = total_drone_turns / len(drones)
+        print(f"Average turns per drone: {avg_turns:.2f}")
+
+        total_moves = 0
+        for d in drones:
+            for t in range(1, len(d.history)):
+                if d.history[t] != d.history[t - 1] \
+                        and d.history[t - 1] != end_hub:
+                    total_moves += 1
+
+        avg_moves_per_turn = total_moves / total_sim_turns
+        print(f"Average drones moved per turn: {avg_moves_per_turn:.2f}")
 
 
 if __name__ == "__main__":

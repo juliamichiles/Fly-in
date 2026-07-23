@@ -1,13 +1,14 @@
 # Next:
-- [ ] run test_parser! Its passing a few invalid maps
+- DOCSTRINGS
+- Remove unnecessary comments
+- README
 - [ ] fix Makefile
-- [ ] Move all files to the rootof the repo
-- [ ] algorithm might still be wrong... kkrying
 - [ ] Ensure all subject requirements are matched now
 - [ ] A bunch of tests
 - [ ] Write a testing script that reads terminal simulation
-- [ ] After everything is trully working, linters!!
-- [ ] NOTES on everything that changed recently
+- [ ] NOTES:
+        - [X] mapf
+        - [ ] parser
 
 # IMPORTANT QUESTIONS:
 - How makefile runs main.py with/without a map?
@@ -20,6 +21,9 @@
 - [X] simulation_log() possibly has issues (not printing connection name right)
 - [X] Fix visualization: zone names are unreadable for large maps
 - [X] Ensure terminal simulation is being printed correctly
+- [X] run test_parser! Its passing a few invalid maps
+- [X] Move all files to the root of the repo
+- [X] After everything is trully working, linters!!
 
 # Parser:
 - Parses map file in a data structure and partially validates it so far

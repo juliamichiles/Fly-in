@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 from graph import Graph
 from mapf import Drone
-from errors import VizualizationError
+from errors import VisualizationError
 try:
     import os
     os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-    import pygame
+    import pygame  # type: ignore
 except (ImportError, ModuleNotFoundError) as e:
-    raise VizualizationError(e)
+    raise VisualizationError(e)
 
 
-class Vizualizer:
+class Visualizer:
 
     def __init__(
             self,
@@ -52,17 +52,22 @@ class Vizualizer:
 
     def _get_color(self, color_str: str) -> tuple[int, int, int]:
         try:
-            return tuple(pygame.Color(color_str))[:3]
+            c = pygame.Color(color_str)
+            return (c.r, c.g, c.b)
         except (ValueError, TypeError):
             return (200, 200, 200)  # grey as default
 
-    def _to_screen_coords(self, x: int, y: int) -> tuple[int, int]:
+    def _to_screen_coords(
+            self,
+            x: int | float,
+            y: float | int
+            ) -> tuple[int, int]:
         """Maps map coordinates to Pygame window pixels."""
-        screen_x = self.padding + (x - self.min_x) * self.cell_size
-        screen_y = self.padding + (y - self.min_y) * self.cell_size
+        screen_x = int(self.padding + (x - self.min_x) * self.cell_size)
+        screen_y = int(self.padding + (y - self.min_y) * self.cell_size)
         return screen_x, screen_y
 
-    def draw(self):
+    def draw(self) -> None:
         self.screen.fill(self.bg_color)
 
         # Draw connections
@@ -169,7 +174,7 @@ class Vizualizer:
         self.screen.blit(hud_lbl, (20, 20))
         pygame.display.flip()
 
-    def run(self):
+    def run(self) -> None:
         running = True
         while running:
             self.draw()

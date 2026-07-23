@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from typing import Any
 from errors import MapError
 from map_data import Map
 from validation import Validation
@@ -70,7 +71,7 @@ class Parser:
 
     def _parse_zone(self,
                     line: str,
-                    n: int) -> tuple[str, dict[str, object]]:
+                    n: int) -> tuple[str, dict[str, Any]]:
 
         match = self.ZONE_PAT.match(line)
         if not match:
@@ -80,7 +81,7 @@ class Parser:
             )
 
         hub_type, name, x_str, y_str, md_str = match.groups()
-        metadata = self._parse_metadata(md_str)
+        metadata = self._parse_metadata(md_str, n)
         return name, {
             "type": hub_type,
             "x": int(x_str),
@@ -104,12 +105,12 @@ class Parser:
                     )
 
         a, b, md_str = match.groups()
-        metadata = self._parse_metadata(md_str)
+        metadata = self._parse_metadata(md_str, n)
         return a, b, metadata, n
 
-    def _parse_metadata(self, md_str: str) -> dict[str, str]:
+    def _parse_metadata(self, md_str: str, n: int) -> dict[str, str]:
 
-        metadata = {}
+        metadata: dict[str, str] = {}
 
         if not md_str:
             return metadata
@@ -120,7 +121,7 @@ class Parser:
             match = self.META_PAT.match(token)
             if not match:
                 raise MapError(
-                        f"Invalid metadata format: '{token}'"
+                        f"[line {n}] Invalid metadata format: '{token}'"
                         " must be in 'key=value' format."
                 )
             key, value = match.groups()
@@ -135,8 +136,8 @@ class Parser:
         if not self.lines:
             raise MapError("[invalid map file] map is empty")
 
-        zones: dict[str, dict[str, object]] = {}
-        connections: list[tuple[str, str, dict[str, str]]] = []
+        zones: dict[str, dict[str, Any]] = {}
+        connections: list[tuple[str, str, dict[str, str], int]] = []
         nb_drones = self._parse_drones()
         seen_connection = False
 
@@ -189,35 +190,35 @@ class Parser:
         return map_info
 
 
-if __name__ == "__main__":
-
-    import sys
-    from pprint import pprint
-
-    argc: int = len(sys.argv)
-    if argc == 2:
-        try:
-            parser = Parser(sys.argv[1])
-            map_info = parser.parse_map()
-            print("Success parsing map!\n")
-            print("=== MAP CONTENT ===")
-            print("\n".join(
-                f"{name}: {info['type']} at ({info['x']}, {info['y']}) "
-                f"[{info['metadata'].get('color', 'none')}]"
-                for name, info in map_info.zones.items()
-                )
-            )
-            print("\n\nThe actual strcture:\nZones:\n")
-            pprint(map_info.zones)
-            print("\nConnections:\n")
-            pprint(map_info.connections)
-            # print(f"Number of drones: {map_info.nb_drones}")
-            # print(f"Zones: {map_info.zones}")
-            # print(f"Connections: {map_info.connections}")
-        except MapError as e:
-            print(e)
-    elif argc < 2:
-        print("If you don't give me a file name, I can't open it...")
-
-    else:
-        print("Too many files! One at a time please...")
+# if __name__ == "__main__":
+#
+#     import sys
+#     from pprint import pprint
+#
+#     argc: int = len(sys.argv)
+#     if argc == 2:
+#         try:
+#             parser = Parser(sys.argv[1])
+#             map_info = parser.parse_map()
+#             print("Success parsing map!\n")
+#             print("=== MAP CONTENT ===")
+#             print("\n".join(
+#                 f"{name}: {info['type']} at ({info['x']}, {info['y']}) "
+#                 f"[{info['metadata'].get('color', 'none')}]"
+#                 for name, info in map_info.zones.items()
+#                 )
+#             )
+#             print("\n\nThe actual strcture:\nZones:\n")
+#             pprint(map_info.zones)
+#             print("\nConnections:\n")
+#             pprint(map_info.connections)
+#             # print(f"Number of drones: {map_info.nb_drones}")
+#             # print(f"Zones: {map_info.zones}")
+#             # print(f"Connections: {map_info.connections}")
+#         except MapError as e:
+#             print(e)
+#     elif argc < 2:
+#         print("If you don't give me a file name, I can't open it...")
+#
+#     else:
+#         print("Too many files! One at a time please...")

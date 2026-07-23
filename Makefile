@@ -1,7 +1,7 @@
 PYTHON      = python3
 VENV        = .venv
 ACTIVATE    = . $(VENV)/bin/activate
-MAIN        = src/main.py
+MAIN        = main.py
 
 # ---- Environment --- #
 venv:

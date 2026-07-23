@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 from errors import MapError
 from map_data import Map
+from typing import Any
 
 
 class Validation:
 
     @staticmethod
-    def _validate_zones(zones: dict[str, object]) -> None:
+    def _validate_zones(zones: dict[str, dict[str, Any]]) -> None:
 
         end_count = 0
         start_count = 0
@@ -65,8 +66,8 @@ class Validation:
                     "[invalid map file] Missing end_hub or start_hub"
                     )
 
-        start = None
-        end = None
+        start: dict[str, Any] | None = None
+        end: dict[str, Any] | None = None
 
         for zone in zones.values():
             if zone["type"] == "start_hub":

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 from parser import Parser
-from errors import MapError, VizualizationError
+from errors import MapError, PathError, VisualizationError
 from graph import Graph
 from mapf import Scheduler
 
@@ -22,21 +22,27 @@ def main() -> None:
         start = graph.get_start()
         end = graph.get_end()
 
+        if not start or not end:
+            # this won't ever be prited since map wa already validated
+            # it's only here bc of mypy
+            raise MapError("Missing start or end hub")
         scheduler = Scheduler(graph)
         drones = scheduler.schedule(map_info.nb_drones, start, end)
         scheduler.simulation_log(drones, end)
+        scheduler.print_statistics(drones, end)
 
-        from gui import Vizualizer
+        from gui import Visualizer
 
-        viz = Vizualizer(graph, drones)
+        viz = Visualizer(graph, drones)
         viz.run()
 
     except MapError as e:
         print(f"Map error: {e}")
-
-    except VizualizationError as e:
-        print("[WARNING] GUI Vizualizer currently unavaliable.")
-        print(f"VizualizationError: {e}")
+    except PathError as e:
+        print(f"PathError: {e}")
+    except VisualizationError as e:
+        print("[WARNING] GUI Visualizer currently unavaliable.")
+        print(f"VisualizationError: {e}")
 
 
 if __name__ == "__main__":

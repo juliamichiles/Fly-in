@@ -1,31 +1,38 @@
 #!/usr/bin/env python3
 from errors import ConnectionError
+from typing import Any
 
 
 class Graph:
 
     def __init__(self,
-                 zones: dict[str, dict[str, object]],
+                 zones: dict[str, dict[str, Any]],
                  connections: list[tuple[str, str, dict[str, str], int]]
                  ) -> None:
-        self.zones = zones
+        self.zones: dict[str, dict[str, Any]] = zones
         self.connections = connections
         self.connection_info = {
             (min(a, b), max(a, b)): metadata
             for a, b, metadata, _ in connections
         }
-        self.connection_names = {}
+        self.connection_names: dict[tuple[str, str], str] = {}
+
         for a, b, _, _ in connections:
             og_name = f"{a}-{b}"
             self.connection_names[(a, b)] = og_name
             self.connection_names[(b, a)] = og_name
-        self.graph = self._build_graph(connections)
+
+        self.graph: dict[str, list[tuple[
+            str,
+            float,
+            dict[str, str]
+            ]]] = self._build_graph(connections)
 
     def get_connection_name(self, a: str, b: str) -> str:
         return self.connection_names.get((a, b), f"{a}-{b}")
 
     @staticmethod
-    def _get_cost(zone: dict[str, object]) -> float | None:
+    def _get_cost(zone: dict[str, Any]) -> float | None:
         # cost depends on the destination node, not the connection.
         zone_type = zone["metadata"].get("zone", "normal")
 
@@ -41,9 +48,13 @@ class Graph:
     def _build_graph(
             self,
             connections: list[tuple[str, str, dict[str, str], int]]
-            ) -> dict[str, list[tuple[str, int, dict[str, str]]]]:
+            ) -> dict[str, list[tuple[str, float, dict[str, str]]]]:
 
-        graph = {name: [] for name in self.zones}
+        graph: dict[str, list[tuple[
+            str,
+            float,
+            dict[str, str]
+            ]]] = {name: [] for name in self.zones}
 
         for hub_a, hub_b, metadata, _ in connections:
             cost_to_b = self._get_cost(self.zones[hub_b])
@@ -54,20 +65,24 @@ class Graph:
                 graph[hub_b].append((hub_a, cost_to_a, metadata))
         return graph
 
-    def neighbors(self, node: str) -> list[tuple]:
+    def neighbors(self, node: str) -> list[tuple[
+                str,
+                float,
+                dict[str, str]
+            ]]:
         return self.graph[node]
 
     def is_blocked(self, node: str) -> bool:
         zone_md = self.zones[node]["metadata"].get("zone")
-        return zone_md == "blocked"
+        return bool(zone_md == "blocked")
 
     def is_restricted(self, node: str) -> bool:
         zone_md = self.zones[node]["metadata"].get("zone")
-        return zone_md == "restricted"
+        return bool(zone_md == "restricted")
 
     def is_priority(self, node: str) -> bool:
         zone_md = self.zones[node]["metadata"].get("zone")
-        return zone_md == "priority"
+        return bool(zone_md == "priority")
 
     def zone_capacity(self, node: str) -> int | float:
         zone_type = self.zones[node].get("type")
@@ -88,11 +103,13 @@ class Graph:
         for name, zone in self.zones.items():
             if zone["type"] == "end_hub":
                 return name
+        return None
 
     def get_start(self) -> str | None:
         for name, zone in self.zones.items():
             if zone["type"] == "start_hub":
                 return name
+        return None
 
 
 if __name__ == "__main__":
