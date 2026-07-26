@@ -7,7 +7,18 @@ from mapf import Scheduler
 
 
 def main() -> None:
+    """Main entry point for the Multi-Agent Pathfinding simulation engine.
 
+    Execute the simulation lifecycle.
+
+    Reads command-line arguments to locate the target map file, parses and
+    validates the map structure, initializes the graph representation,
+    schedules drone paths using time-aware pathfinding, prints performance
+    logs/statistics, and attempts to launch the Pygame visualizer.
+
+    Returns:
+        None
+    """
     if len(sys.argv) < 2:
         print("Usage: ./main.py <map_file> [k_paths]")
         return
@@ -26,6 +37,7 @@ def main() -> None:
             # this won't ever be prited since map wa already validated
             # it's only here bc of mypy
             raise MapError("Missing start or end hub")
+
         scheduler = Scheduler(graph)
         drones = scheduler.schedule(map_info.nb_drones, start, end)
         scheduler.simulation_log(drones, end)

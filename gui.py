@@ -2,6 +2,7 @@
 from graph import Graph
 from mapf import Drone
 from errors import VisualizationError
+from typing import List, Dict, Tuple
 try:
     import os
     os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -15,7 +16,7 @@ class Visualizer:
     def __init__(
             self,
             graph: Graph,
-            drones: list[Drone],
+            drones: List[Drone],
             cell_size: int = 120,
             padding: int = 100
     ) -> None:
@@ -45,12 +46,12 @@ class Visualizer:
 
         # Fallback for 1D or small maps
         self.screen = pygame.display.set_mode(
-                (max(width, 800), max(height, 600))
+                (max(width, 400), max(height, 300))
         )
         pygame.display.set_caption("Fly-in")
         self.clock = pygame.time.Clock()
 
-    def _get_color(self, color_str: str) -> tuple[int, int, int]:
+    def _get_color(self, color_str: str) -> Tuple[int, int, int]:
         try:
             c = pygame.Color(color_str)
             return (c.r, c.g, c.b)
@@ -61,7 +62,7 @@ class Visualizer:
             self,
             x: int | float,
             y: float | int
-            ) -> tuple[int, int]:
+            ) -> Tuple[int, int]:
         """Maps map coordinates to Pygame window pixels."""
         screen_x = int(self.padding + (x - self.min_x) * self.cell_size)
         screen_y = int(self.padding + (y - self.min_y) * self.cell_size)
@@ -86,11 +87,11 @@ class Visualizer:
                         pos_v,
                         2)
         # Draw zones
-        zone_occupants: dict[
+        zone_occupants: Dict[
                 str,
-                list[int]
+                List[int]
         ] = {name: [] for name in self.graph.zones}
-        transit_occupants: dict[str, list[int]] = {}
+        transit_occupants: Dict[str, List[int]] = {}
 
         for drone in self.drones:
             if self.current_turn < len(drone.history):
@@ -111,7 +112,13 @@ class Visualizer:
 
             lbl_name = name
             if len(name) > 10:
-                lbl_name = name[:9] + name[-1]
+                base_name = name[:9]
+                trailing_digits = "".join([c for c in name if c.isdigit()])
+                if trailing_digits and not base_name.endswith(trailing_digits):
+                    lbl_name = base_name + trailing_digits
+                else:
+                    lbl_name = base_name
+
             lbl = self.font.render(lbl_name, True, self.connect_color)
             self.screen.blit(lbl, (px - lbl.get_width() // 2, py - 35))
 

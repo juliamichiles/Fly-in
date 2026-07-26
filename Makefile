@@ -2,6 +2,7 @@ PYTHON      = python3
 VENV        = .venv
 ACTIVATE    = . $(VENV)/bin/activate
 MAIN        = main.py
+ARGS        ?= maps/easy/01_linear_path.txt
 
 # ---- Environment --- #
 venv:
@@ -21,7 +22,7 @@ install:
 
 # --- Run / Debug ---- #
 run:
-	$(PYTHON) $(MAIN)
+	$(PYTHON) $(MAIN) $(ARGS)
 
 debug:
 	$(PYTHON) -m pdb $(MAIN)
@@ -30,6 +31,9 @@ debug:
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	rm -rf .mypy_cache
+
+fclean: clean
+	rm -rf $(VENV)
 
 # ------ Linting ----- #
 lint:
@@ -44,3 +48,5 @@ lint:
 lint-strict:
 	flake8 .
 	mypy . --strict
+
+.PHONY: venv install run debug clean fclean lint lint-strict

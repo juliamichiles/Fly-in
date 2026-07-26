@@ -2,20 +2,21 @@
 from graph import Graph
 from heapq import heappop, heappush
 from errors import PathError
+from typing import Set, List, Dict, Tuple
 
 
 class Drone:
-    def __init__(self, drone_id: int, path: list[str]) -> None:
+    def __init__(self, drone_id: int, path: List[str]) -> None:
         self.id = drone_id
         self.path = path
         self.position_index = -1
-        self.history: list[str] = []
+        self.history: List[str] = []
 
 
 class ReservationTable:
     def __init__(self, graph: Graph) -> None:
-        self.node_reservations: dict[tuple[str, int], list[int]] = {}
-        self.edge_reservations: dict[tuple[str, str, int], list[int]] = {}
+        self.node_reservations: Dict[Tuple[str, int], List[int]] = {}
+        self.edge_reservations: Dict[Tuple[str, str, int], List[int]] = {}
         self.graph = graph
 
     def reserve_node(self, node: str, time: int, drone_id: int) -> None:
@@ -46,7 +47,7 @@ class ReservationTable:
         current = self.edge_reservations.get(key, [])
         return len(current) < capacity
 
-    def _edge_key(self, a: str, b: str, time: int) -> tuple[str, str, int]:
+    def _edge_key(self, a: str, b: str, time: int) -> Tuple[str, str, int]:
         return (min(a, b), max(a, b), time)
 
 
@@ -59,18 +60,18 @@ class PathFinding:
             start: str,
             end: str,
             start_time: int = 0
-            ) -> tuple[list[str] | None, int | float]:
+            ) -> Tuple[List[str] | None, int | float]:
 
-        # list of (path_weight, time_cost, current_node, path_history)
-        to_explore: list[tuple[
+        # List of (path_weight, time_cost, current_node, path_history)
+        to_explore: List[Tuple[
             float,
             int,
             str,
-            list[str]
+            List[str]
             ]] = [(0.0, start_time, start, [])]
 
         # tracks both node and time
-        visited: set[tuple[str, int]] = set()
+        visited: Set[Tuple[str, int]] = set()
         time_limit = 1000
 
         while to_explore:
@@ -142,7 +143,7 @@ class Scheduler:
             nb_drones: int,
             start: str,
             end: str
-    ) -> list[Drone]:
+    ) -> List[Drone]:
 
         drones = []
 
@@ -177,7 +178,7 @@ class Scheduler:
         return drones
 
     @staticmethod
-    def simulation_log(drones: list[Drone], end_hub: str) -> None:
+    def simulation_log(drones: List[Drone], end_hub: str) -> None:
         if not drones:
             return
 
@@ -203,12 +204,11 @@ class Scheduler:
         # print(f"total_turns: {total_turns}")
 
     @staticmethod
-    def print_statistics(drones: list[Drone], end_hub: str) -> None:
+    def print_statistics(drones: List[Drone], end_hub: str) -> None:
         if not drones:
             return
 
-        print("\n --- Performance Statistics ---")
-        print("------------------------------")
+        print("\n--- Performance Statistics ---")
         total_sim_turns = max(len(d.history) for d in drones) - 1
         if total_sim_turns <= 0:
             return

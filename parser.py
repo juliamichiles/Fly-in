@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-from typing import Any
 from errors import MapError
 from map_data import Map
 from validation import Validation
+from typing import Any, List, Dict, Tuple
 import re
 
 
 class Parser:
+    """Parse map configuration files and construct validated Map objects.
 
-    # FIXME: Can I have this uppercase variables?
+    Handles file reading, comment stripping, regex-based syntax matching,
+        metadata extraction, and basic structure validation.
+    """
+
     DRONE_PAT = re.compile(r"^nb_drones:\s*(\d+)$")
     # Matches: <type>: <name> <x> <y> [metadata]
     # Captures: type, name, x, y, and optional metadata string
@@ -28,12 +32,25 @@ class Parser:
     META_PAT = re.compile(r"([^\s=]+)=([^\s=]+)")
 
     def __init__(self, filename: str) -> None:
+        """Initialize the Parser instance.
 
+        Args:
+            filename: Path to the target map file.
+        """
         self.filename: str = filename
-        self.lines: list[tuple[int, str]] = []
+        self.lines: List[Tuple[int, str]] = []
 
-    def _clean_map(self) -> list[tuple[int, str]]:
+    def _clean_map(self) -> List[Tuple[int, str]]:
+        """Read file contents and remove comments and blank lines.
 
+        Returns:
+            A list of tuples containing the 1-based original line number and
+                the stripped line content.
+
+        Raises:
+            MapError: If the file cannot be opened due to missing file,
+                permission error, or path pointing to a directory.
+        """
         try:
             with open(self.filename, "r") as file:
                 lines = file.readlines()
@@ -54,6 +71,15 @@ class Parser:
         return clear_map
 
     def _parse_drones(self) -> int:
+        """Parse and extract the number of drones from the first valid line.
+
+        Returns:
+            The total number of drones specified in the map file.
+
+        Raises:
+            MapError: If the first line does not match the drone syntax or
+                if the specified drone count is less than or equal to 0.
+        """
 
         n, first_line = self.lines[0]
         match = self.DRONE_PAT.match(first_line)
@@ -71,7 +97,20 @@ class Parser:
 
     def _parse_zone(self,
                     line: str,
-                    n: int) -> tuple[str, dict[str, Any]]:
+                    n: int) -> Tuple[str, Dict[str, Any]]:
+        """Parse a single zone declaration line into its name and attributes.
+
+        Args:
+            line: Raw string line defining a zone.
+            n: Line number in the source map file.
+
+        Returns:
+            A tuple containing the zone name string and a dictionary of zone
+                attributes (type, coordinates, parsed metadata, and line number).
+
+        Raises:
+            MapError: If line syntax fails to match expected zone format.
+        """
 
         match = self.ZONE_PAT.match(line)
         if not match:
@@ -90,13 +129,25 @@ class Parser:
             "line": n
         }
 
-    def _parse_connection(self, line: str, n: int) -> tuple[
+    def _parse_connection(self, line: str, n: int) -> Tuple[
             str,
             str,
-            dict[str, str],
+            Dict[str, str],
             int
             ]:
+        """Parse a connection declaration line.
 
+        Args:
+            line: Raw string line defining a connection between two hubs.
+            n: Line number in the source map file.
+
+        Returns:
+            A tuple containing zone name A, zone name B, metadata dictionary,
+                and line number.
+
+        Raises:
+            MapError: If line syntax fails to match expected connection format.
+        """
         match = self.CONN_PAT.match(line)
         if not match:
             raise MapError(
@@ -108,9 +159,21 @@ class Parser:
         metadata = self._parse_metadata(md_str, n)
         return a, b, metadata, n
 
-    def _parse_metadata(self, md_str: str, n: int) -> dict[str, str]:
+    def _parse_metadata(self, md_str: str, n: int) -> Dict[str, str]:
+        """Parse bracketed key=value metadata strings into a dictionary.
 
-        metadata: dict[str, str] = {}
+        Args:
+            md_str: Raw metadata inner string (without outer brackets).
+            n: Line number in the source map file.
+
+        Returns:
+            A dictionary mapping string metadata keys to string values.
+
+        Raises:
+            MapError: If any token in the metadata string is not formatted
+                as key=value.
+        """
+        metadata: Dict[str, str] = {}
 
         if not md_str:
             return metadata
@@ -130,14 +193,27 @@ class Parser:
         return metadata
 
     def parse_map(self) -> Map:
+        """Parse the entire map file content into a validated Map instance.
 
+        Executes structural order validation (zones declared before
+            connections), uniqueness checks, and passes data to the domain
+            validator.
+
+        Returns:
+            A fully constructed and validated Map object.
+
+        Raises:
+            MapError: If file is empty, missing connections, contains unknown
+                syntax,contains duplicate zone names, or has connections
+                referencing unknown zones.
+        """
         self.lines = self._clean_map()
 
         if not self.lines:
             raise MapError("[invalid map file] map is empty")
 
-        zones: dict[str, dict[str, Any]] = {}
-        connections: list[tuple[str, str, dict[str, str], int]] = []
+        zones: Dict[str, Dict[str, Any]] = {}
+        connections: List[Tuple[str, str, Dict[str, str], int]] = []
         nb_drones = self._parse_drones()
         seen_connection = False
 

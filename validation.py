@@ -1,14 +1,28 @@
 #!/usr/bin/env python3
 from errors import MapError
 from map_data import Map
-from typing import Any
+from typing import Any, List, Dict, Tuple
 
 
 class Validation:
+    """Validate semantic correctness and constraint rules for parsed map data."""
 
     @staticmethod
-    def _validate_zones(zones: dict[str, dict[str, Any]]) -> None:
+    def _validate_zones(zones: Dict[str, Dict[str, Any]]) -> None:
+        """Validate zone configuration rules, hub counts, and metadata fields.
 
+        Args:
+            zones: A dictionary mapping zone names to their parsed attribute 
+                dictionaries.
+
+        Returns:
+            None
+
+        Raises:
+            MapError: If hub types are unrecognized, hub counts are invalid
+                (not exactly one start_hub and one end_hub), metadata keys/values
+                are invalid, or start and end hubs share identical coordinates.
+        """
         end_count = 0
         start_count = 0
         valid_types = {"normal", "blocked", "restricted", "priority"}
@@ -66,8 +80,8 @@ class Validation:
                     "[invalid map file] Missing end_hub or start_hub"
                     )
 
-        start: dict[str, Any] | None = None
-        end: dict[str, Any] | None = None
+        start: Dict[str, Any] | None = None
+        end: Dict[str, Any] | None = None
 
         for zone in zones.values():
             if zone["type"] == "start_hub":
@@ -84,9 +98,23 @@ class Validation:
 
     @staticmethod
     def _validate_connections(
-            connections: list[tuple[str, str, dict[str, str], int]]
+            connections: List[Tuple[str, str, Dict[str, str], int]]
     ) -> None:
+        """Validate connection metadata, edge uniqueness, and self-connection
+        constraints.
 
+        Args:
+            connections: A list of tuples containing zone_a, zone_b,
+                metadata dictionary, and original line number.
+
+        Returns:
+            None
+
+        Raises:
+            MapError: If duplicate connections exist, a hub connects to itself,
+                unsupported metadata keys are present, or max_link_capacity is 
+                invalid.
+        """
         seen = set()
 
         for connect in connections:
@@ -94,10 +122,8 @@ class Validation:
 
             if metadata and set(metadata.keys()) != {"max_link_capacity"}:
                 raise MapError(f"[line {line}] Invalid metadata")
-                # is this really the only allowed metadata for a connection?
 
             key = tuple(sorted((zone_a, zone_b)))
-
             if key in seen:
                 raise MapError(
                         f"[line {line}] Duplicate"
@@ -122,6 +148,18 @@ class Validation:
                     )
 
     def validate(self, map_data: Map) -> None:
+        """Execute all map validation routines on a given Map object.
+
+        Args:
+            map_data: The Map dataclass/object containing parsed zones and 
+                connections.
+
+        Returns:
+            None
+
+        Raises:
+            MapError: If any zone or connection constraint rule is violated.
+        """
         self._validate_connections(map_data.connections)
         self._validate_zones(map_data.zones)
 

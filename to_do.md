@@ -1,14 +1,19 @@
 # Next:
-- DOCSTRINGS
+- DOCSTRINGS:
+    - [X] errors.py 
+    - [X] parser.py 
+    - [X] validation.py
+    - [X] map_data.py 
+    - [X] graph.py 
+    - [ ] mapf.py 
+    - [ ] gui.py 
+    - [X] main.py 
 - Remove unnecessary comments
 - README
-- [ ] fix Makefile
 - [ ] Ensure all subject requirements are matched now
 - [ ] A bunch of tests
 - [ ] Write a testing script that reads terminal simulation
-- [ ] NOTES:
-        - [X] mapf
-        - [ ] parser
+- [ ] Linters + Ensure everything still works
 
 # IMPORTANT QUESTIONS:
 - How makefile runs main.py with/without a map?
@@ -24,6 +29,10 @@
 - [X] run test_parser! Its passing a few invalid maps
 - [X] Move all files to the root of the repo
 - [X] After everything is trully working, linters!!
+- [X] NOTES:
+        - [X] mapf
+        - [X] parser
+- [X] fix Makefile
 
 # Parser:
 - Parses map file in a data structure and partially validates it so far
@@ -93,7 +102,7 @@
 - [ ] Create test programs to verify project functionality (not submitted or
         graded). Use frameworks like pytest or unittest for unit tests, covering 
         ege cases.
-- [ ] Is algorithm too naif? Maybe improve mapf algorithm
+- [X] Is algorithm too naif? Yes, it was. Now it's smarter
 
 # General
 - [ ] think about project structure:
@@ -115,5 +124,5 @@
 
 # Notes on:
 - [X] "Draw" all data structures
-- [ ] mapf file methods
-- [ ] GUI + pygame
+- [X] mapf file methods
+- [X] GUI + pygame
