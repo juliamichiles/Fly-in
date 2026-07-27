@@ -12,6 +12,7 @@ except (ImportError, ModuleNotFoundError) as e:
 
 
 class Visualizer:
+    """Render and animate drone routes step-by-step using Pygame graphics."""
 
     def __init__(
             self,
@@ -20,7 +21,16 @@ class Visualizer:
             cell_size: int = 120,
             padding: int = 100
     ) -> None:
+        """Initialize the Pygame visualizer window and parameters.
 
+        Args:
+            graph: The Graph instance containing map zones and coordinates.
+            drones: List of scheduled Drone instances with history paths.
+            cell_size: Pixel scaling factor between map grid coordinates.
+                Defaults to 120.
+            padding: Outer pixel margin surrounding rendered map contents.
+                Defaults to 100.
+        """
         self.bg_color = (10, 16, 10)  # Ultra-dark green/black
         self.connect_color = (51, 102, 0)
         self.drone_color = (255, 255, 255)
@@ -52,6 +62,15 @@ class Visualizer:
         self.clock = pygame.time.Clock()
 
     def _get_color(self, color_str: str) -> Tuple[int, int, int]:
+        """Parse a color string into an RGB color tuple.
+
+        Args:
+            color_str: String representation of a color (e.g., 'red', 'green').
+
+        Returns:
+            An (R, G, B) integer tuple corresponding to the requested color,
+                or grey on error.
+        """
         try:
             c = pygame.Color(color_str)
             return (c.r, c.g, c.b)
@@ -63,12 +82,26 @@ class Visualizer:
             x: int | float,
             y: float | int
             ) -> Tuple[int, int]:
-        """Maps map coordinates to Pygame window pixels."""
+        """Map grid coordinates to Pygame window pixel coordinates.
+
+        Args:
+            x: Horizontal grid position.
+            y: Vertical grid position.
+
+        Returns:
+            A tuple of (screen_x, screen_y) pixel coordinates in window space.
+        """
         screen_x = int(self.padding + (x - self.min_x) * self.cell_size)
         screen_y = int(self.padding + (y - self.min_y) * self.cell_size)
         return screen_x, screen_y
 
     def draw(self) -> None:
+        """Render current turn frame including zone nodes, connections, and
+                drone markers.
+
+        Returns:
+            None
+        """
         self.screen.fill(self.bg_color)
 
         # Draw connections
@@ -182,6 +215,12 @@ class Visualizer:
         pygame.display.flip()
 
     def run(self) -> None:
+        """Start the visualizer execution loop and process user arrow-key
+                navigation.
+
+        Returns:
+            None
+        """
         running = True
         while running:
             self.draw()

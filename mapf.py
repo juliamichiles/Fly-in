@@ -6,7 +6,17 @@ from typing import Set, List, Dict, Tuple
 
 
 class Drone:
+    """Represent an individual drone agent within the simulation
+            environment.
+    """
     def __init__(self, drone_id: int, path: List[str]) -> None:
+        """Initialize a Drone instance.
+
+        Args:
+            drone_id: Unique integer identifier for the drone.
+            path: Sequence of zone or connection names representing the
+                scheduled route.
+        """
         self.id = drone_id
         self.path = path
         self.position_index = -1
@@ -14,16 +24,45 @@ class Drone:
 
 
 class ReservationTable:
+    """Space-time reservation table to prevent node and edge collisions
+            between agents.
+    """
     def __init__(self, graph: Graph) -> None:
+        """Initialize the ReservationTable instance with map graph references.
+
+        Args:
+            graph: The Graph instance containing zone and connection
+                capacities.
+        """
         self.node_reservations: Dict[Tuple[str, int], List[int]] = {}
         self.edge_reservations: Dict[Tuple[str, str, int], List[int]] = {}
         self.graph = graph
 
     def reserve_node(self, node: str, time: int, drone_id: int) -> None:
+        """Reserve a zone node for a specific drone at a given time tick.
+
+        Args:
+            node: Name of the zone node to reserve.
+            time: Time tick index.
+            drone_id: Identifier of the drone making the reservation.
+
+        Returns:
+            None
+        """
         self.node_reservations.setdefault((node, time), []).append(drone_id)
 
     def is_node_free(self, node: str, time: int) -> bool:
+        """Check whether a zone node has available capacity at a specific time
+            tick.
 
+        Args:
+            node: Zone node name to inspect.
+            time: Time tick index.
+
+        Returns:
+            True if remaining node capacity permits another drone, False zone
+                otherwise.
+        """
         if "-" in node:
             return True
 
@@ -38,20 +77,55 @@ class ReservationTable:
             time: int,
             drone_id: int
             ) -> None:
+        """Reserve a connection edge between two nodes at a specific time tick.
+
+        Args:
+            a: First node connected by the edge link.
+            b: Second node connected by the edge link.
+            time: Time tick index.
+            drone_id: Identifier of the drone making the edge reservation.
+
+        Returns:
+            None
+        """
         key = self._edge_key(a, b, time)
         self.edge_reservations.setdefault(key, []).append(drone_id)
 
     def is_edge_free(self, a: str, b: str, time: int) -> bool:
+        """Check whether an edge connection has available capacity at a given
+            time tick.
+
+        Args:
+            a: First node connected by the edge.
+            b: Second node connected by the edge.
+            time: Time tick index.
+
+        Returns:
+            True if edge capacity permits traversal, False otherwise.
+        """
         capacity = self.graph.connection_capacity(a, b)
         key = self._edge_key(a, b, time)
         current = self.edge_reservations.get(key, [])
         return len(current) < capacity
 
     def _edge_key(self, a: str, b: str, time: int) -> Tuple[str, str, int]:
+        """Construct an undirected canonical key for edge lookup in reservation
+            dictionaries.
+
+        Args:
+            a: First node name.
+            b: Second node name.
+            time: Time tick index.
+
+        Returns:
+            A tuple of sorted node names and time index: (min_node, max_node,
+                time).
+        """
         return (min(a, b), max(a, b), time)
 
 
 class PathFinding:
+    """Container class for space-time search algorithms."""
 
     @staticmethod
     def path_finding(
@@ -61,7 +135,25 @@ class PathFinding:
             end: str,
             start_time: int = 0
             ) -> Tuple[List[str] | None, int | float]:
+        """Find a conflict-free path from start to end in space-time using
+                priority search.
 
+        Args:
+            graph: Graph instance representing grid topology.
+            reservations: ReservationTable tracking existing drone
+                reservations.
+            start: Name of the starting hub node.
+            end: Name of the destination end hub node.
+            start_time: Initial time tick index to begin search from. Defaults
+                to 0.
+
+        Returns:
+            A tuple containing:
+                - List of visited locations (nodes/transit links) if found,
+                    else None.
+                - Final time tick integer if path exists, otherwise
+                    float("inf").
+        """
         # List of (path_weight, time_cost, current_node, path_history)
         to_explore: List[Tuple[
             float,
@@ -134,7 +226,14 @@ class PathFinding:
 
 
 class Scheduler:
+    """Orchestrate priority-based path scheduling for multiple drone agents."""
+
     def __init__(self, graph: Graph) -> None:
+        """Initialize the Scheduler instance.
+
+        Args:
+            graph: Graph representation of the simulation map.
+        """
         self.graph = graph
         self.reservations = ReservationTable(graph)
 
@@ -144,7 +243,21 @@ class Scheduler:
             start: str,
             end: str
     ) -> List[Drone]:
+        """Sequentially plan conflict-free paths for all drones from start to
+                end hub.
 
+        Args:
+            nb_drones: Total number of drone agents to schedule.
+            start: Starting hub name.
+            end: Target end hub name.
+
+        Returns:
+            A list of scheduled Drone instances populated with path histories.
+
+        Raises:
+            PathError: If pathfinding fails to find a valid route for any drone
+                (deadlock).
+        """
         drones = []
 
         for i in range(1, nb_drones + 1):
@@ -179,6 +292,15 @@ class Scheduler:
 
     @staticmethod
     def simulation_log(drones: List[Drone], end_hub: str) -> None:
+        """Print step-by-step turn execution logs to stdout.
+
+        Args:
+            drones: List of scheduled Drone instances.
+            end_hub: Name of the destination hub node.
+
+        Returns:
+            None
+        """
         if not drones:
             return
 
@@ -199,12 +321,20 @@ class Scheduler:
                 if curr_loc != prev_loc:
                     turn_moves.append(f"D{d.id}-{curr_loc}")
             if turn_moves:
-                # print(f"turn: {t}")
                 print(" ".join(turn_moves))
-        # print(f"total_turns: {total_turns}")
 
     @staticmethod
     def print_statistics(drones: List[Drone], end_hub: str) -> None:
+        """Calculate and output simulation performance metrics to standard
+                output.
+
+        Args:
+            drones: List of scheduled Drone instances.
+            end_hub: Target end hub node name.
+
+        Returns:
+            None
+        """
         if not drones:
             return
 

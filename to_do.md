@@ -5,8 +5,8 @@
     - [X] validation.py
     - [X] map_data.py 
     - [X] graph.py 
-    - [ ] mapf.py 
-    - [ ] gui.py 
+    - [X] mapf.py 
+    - [X] gui.py 
     - [X] main.py 
 - Remove unnecessary comments
 - README
