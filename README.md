@@ -3,12 +3,14 @@ _This project has been created as part of the 42 curriculum by juliatav_
 ## Description: 
 ---
 - SUBJECT: section that clearly presents the project, including its goal and a brief overview.
+
 This project's goal is to design a routting system able to navigate a fleet of drones efficiently from a given starting base to a target location in the fewest possible simulation turns while respecting a series of contraints and avoiding deadlocks.
 
 
 ## Algorithm:
 ---
 - SUBJECT: A detailed description of your algorithm choices and implementation strategy must also be included.
+
 The simulation uses a Prioritized Planning architecture combined with a Space-Time Dijkstra inspired search algorithm to resolve complex routing constraints for multiple drones simultaneously. 
 In this strategy, agents are scheduled sequentially (from Drone 1 to N). As each drone successfully plots its path, its occupied nodes and edges are registered into a shared global Reservation Table across specific time ticks (t). Subsequent drones treat these reserved space-time coordinates as dynamic obstacles, forcing them to route around or wait for prior agents to clear bottlenecks, narrow gates, and capacity-limited zones.
 
@@ -16,15 +18,16 @@ Unlike standard spatial pathfinding, the state space encompasses both topologica
 
 To handle heavily restricted topological layouts—such as single-file entry gates and convergence traps—the search implements a hard time-step cutoff ($1,000$ ticks). If a valid conflict-free sequence cannot be found due to saturation, a PathError is raised, cleanly identifying deadlocks without risking infinite execution loops.
 
-## Vizualization:
+## Visualization:
 ---
 - SUBJECT: Documentation of the visual representation features and how they enhance the user
 experience.
+
 The Visualizer built with Pygame transforms multi-agent drone paths into an interactive, real-time graphical simulation. Key features include:
  - Dynamic Map Scaling & Auto-Fit: Automatically measures map bounding coordinates  and compares them against current desktop display resolutions. If a map exceeds screen dimensions, it automatically scales down the pixel 'cell_size'  and abbreviates zone labels to prevent window clipping.
 
 - SUBJECT: Example input and expected output demonstrating the program’s functionality
-# FIXME: make this prettier:
+# TODO: make this prettier:
 Easy Level 2: Simple fork with two paths
 example map:
 nb_drones: 4
@@ -41,7 +44,7 @@ connection: junction-path_b
 connection: path_a-goal
 connection: path_b-goal
 
-Expected output:
+Expected terminal output:
 D1-junction D2-junction
 D1-path_a D2-path_b D3-junction D4-junction
 D1-goal D2-goal D3-path_a D4-path_b
@@ -51,20 +54,45 @@ D3-goal D4-goal
 Average turns per drone: 3.50
 Average drones moved per turn: 3.00
 
-#FIXME: ADD SCREENSHOT OF THIS MAP
+Expected visualization:
+#TODO: ADD SCREENSHOT OF THIS MAP
 
 ## Instructions:
 ---
 - SUBJECT: section containing any relevant information about compilation,
 installation, and/or execution.
+*To create/activate virtual environment:*
+'make venv'
+'source .venv/bin/activate'
 
-The project, as required, contains a Makefile with the following commands:
+*To install depencencies:*
+'make install'
+
+*To run (with default map):*
+'make run'
+*or (with specified map):*
+'make run ARGS=<path to map file>'
+
+*to debug:*
+'make debug'
+
+*to run linters:*
+'make lint'
+'make lint-strict'
+
+*to cleanup:*
+'make clean'
+*or (to remove .venv):*
+'make fclean'
 
 ## Resources:
 ---
 - SUBJECT: section listing classic references related to the topic (documentation, articles, tutorials, etc.), as well as a description of how AI was used —
 specifying for which tasks and which parts of the project.
 
+https://brandonkindred.medium.com/mastering-pathfinding-the-essentials-of-dijkstra-and-a-algorithms-691b226e71c4
+
+https://medium.com/@singhatul1155/dijkstras-algorithm-navigating-the-shortest-path-how-to-use-it-and-its-importance-8924295fe690
 
 ## Mini Glossary:
 - 'Zones': places
