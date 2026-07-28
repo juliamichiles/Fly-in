@@ -36,6 +36,7 @@ class Visualizer:
         self.drone_color = (255, 255, 255)
 
         pygame.init()
+        self.large_map = False
         self.graph = graph
         self.drones = drones
         self.cell_size = cell_size
@@ -51,8 +52,28 @@ class Visualizer:
         self.min_x, self.max_x = min(x_coords), max(x_coords)
         self.min_y, self.max_y = min(y_coords), max(y_coords)
 
+        # Prevent maps larger than the screen
+        info = pygame.display.Info()
+        max_screen_w = info.current_w - 100
+        max_screen_h = info.current_h - 100
+
         width = (self.max_x - self.min_x) * cell_size + (padding * 2)
         height = (self.max_y - self.min_y) * cell_size + (padding * 2)
+
+        grid_span_x = max(1, self.max_x - self.min_x)
+        grid_span_y = max(1, self.max_y - self.min_y)
+
+        if width > max_screen_w or height > max_screen_h:
+            self.large_map = True
+            cell_size_x = (max_screen_w - (padding * 2)) // grid_span_x
+            cell_size_y = (max_screen_h - (padding * 2)) // grid_span_y
+            cell_size = max(30, min(cell_size_x, cell_size_y))
+
+            width = grid_span_x * cell_size + (padding * 2)
+            height = grid_span_y * cell_size + (padding * 2)
+
+        self.cell_size = cell_size
+        self.padding = padding
 
         # Fallback for 1D or small maps
         self.screen = pygame.display.set_mode(
@@ -144,8 +165,12 @@ class Visualizer:
             pygame.draw.circle(self.screen, rgb_color, (px, py), 18, 2)
 
             lbl_name = name
-            if len(name) > 10:
-                base_name = name[:9]
+            if self.large_map:
+                name_max_size = 5
+            else:
+                name_max_size = 10
+            if len(name) > name_max_size:
+                base_name = name[:name_max_size - 1]
                 trailing_digits = "".join([c for c in name if c.isdigit()])
                 if trailing_digits and not base_name.endswith(trailing_digits):
                     lbl_name = base_name + trailing_digits
