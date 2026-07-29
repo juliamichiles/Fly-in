@@ -126,7 +126,7 @@ class Visualizer:
         self.screen.fill(self.bg_color)
 
         # Draw connections
-        for u, v, metadata, _ in self.graph.connections:
+        for u, v, _, _ in self.graph.connections:
             if u in self.graph.zones and v in self.graph.zones:
                 u_x = int(self.graph.zones[u]["x"])
                 u_y = int(self.graph.zones[u]["y"])
@@ -162,14 +162,23 @@ class Visualizer:
 
             color_str = zone["metadata"].get("color", "none")
             rgb_color = self._get_color(color_str)
-            pygame.draw.circle(self.screen, rgb_color, (px, py), 18, 2)
+
+            is_special = zone["type"] in ("start_hub", "end_hub")
+            if is_special:
+                rad = 26
+                wid = 0
+            else:
+                rad = 18
+                wid = 2
+
+            pygame.draw.circle(self.screen, rgb_color, (px, py), rad, wid)
 
             lbl_name = name
             if self.large_map:
                 name_max_size = 5
             else:
                 name_max_size = 10
-            if len(name) > name_max_size:
+            if len(name) > name_max_size and not is_special:
                 base_name = name[:name_max_size - 1]
                 trailing_digits = "".join([c for c in name if c.isdigit()])
                 if trailing_digits and not base_name.endswith(trailing_digits):
@@ -178,11 +187,15 @@ class Visualizer:
                     lbl_name = base_name
 
             lbl = self.font.render(lbl_name, True, self.connect_color)
-            self.screen.blit(lbl, (px - lbl.get_width() // 2, py - 35))
+            offset_y = 45 if is_special else 37
+            self.screen.blit(lbl, (px - lbl.get_width() // 2, py - offset_y))
 
             occupants = zone_occupants[name]
             if occupants:
-                drone_txt = ",".join(str(d_id) for d_id in occupants)
+                if len(occupants) > 4:
+                    drone_txt = f"{occupants[0]}...{occupants[-1]}"
+                else:
+                    drone_txt = ",".join(str(d_id) for d_id in occupants)
                 d_lbl = self.font.render(drone_txt, True, self.drone_color)
 
                 box_w, box_h = d_lbl.get_width() + 6, d_lbl.get_height() + 4
@@ -212,7 +225,10 @@ class Visualizer:
             # Calculate midle of connection
             px, py = self._to_screen_coords((u_x + v_x) / 2, (u_y + v_y) / 2)
 
-            drone_txt = ",".join(str(d_id) for d_id in occupants)
+            if len(occupants) > 4:
+                drone_txt = f"{occupants[0]}...{occupants[-1]}"
+            else:
+                drone_txt = ",".join(str(d_id) for d_id in occupants)
             d_lbl = self.font.render(drone_txt, True, self.drone_color)
             box_w, box_h = d_lbl.get_width() + 6, d_lbl.get_height() + 4
 

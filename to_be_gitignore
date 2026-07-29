@@ -1,2 +1,12 @@
-.mypy_cache/
 __pycache__/
+.mypy_cache/
+venv/
+.venv/
+env/
+ENV/
+*.pyc
+unused
+tests/
+sum_time.py
+time_log
+to_do.md

@@ -1,4 +1,6 @@
 # Next:
+- [ ] A GUI screenshot to README
+- [ ] after in school repo, 'mv to_be_gitignore .gitignore'
 - DOCSTRINGS:
     - [X] errors.py 
     - [X] parser.py 
@@ -22,7 +24,6 @@
 
 # Fixed:
 - [X] GUI was counting an extra turn
-- [X] possibly has even more errors... see browser's chat
 - [X] simulation_log() possibly has issues (not printing connection name right)
 - [X] Fix visualization: zone names are unreadable for large maps
 - [X] Ensure terminal simulation is being printed correctly
@@ -43,8 +44,7 @@
 - [X] Reestructure Parser:
     - [X] Create Map object and store map data there instead of in Parser 
     - [X] Modify Parser so that it returns a Map object
-- [X] Run more tests with the invalid and valid maps
-- [ ] Should I actually print 'MapError' on my error messages?
+- [X] Run more tests with the invalid and valid maps 
 - Might need fixing:
     - [X] Check for dashes AND SPACES on zone names! 
     - [X] Check for repeated names while parsing? Bc the dict might simply 
@@ -61,60 +61,58 @@
 - [X] finish validate_zones
 - [X] call validate inside parse_map
 - [X] test everything
-- [ ] more tests with even more invalid maps
-- [ ] doesn't handle multiple brackets well
+- [X] more tests with even more invalid maps
+- [X] doesn't handle multiple brackets well
 - FIXME:
     - [X] printing line twice for some errors
-    - [ ] not printing line for duplicte zone name and invalid zone name 
-    - [ ] prints the wrong error message:
-        - [ ] multiple brackets maps -> connection to unknown zone 
-        - [ ] empty file -> missing nb_drones
+    - [X] not printing line for duplicte zone name and invalid zone name 
+    - [X] prints the wrong error message:
+        - [X] multiple brackets maps -> connection to unknown zone 
+        - [X] empty file -> missing nb_drones
 
 # Graph:
 - [X] Created graph - tested
 
 # Pathfinding
 - [X] Implemented Dijkstra
-- [X] Apparently working - see chat for minor fixes
+- [X] Apparently working
 - [X] More tests
 - [X] Implement multiple "shortest paths"
 - [X] Notes on assign dones
 - [X] Implement simulation + notes on it 
 - [X] More notes on actual workflow of assign_drones and simulation
-- [ ] More tests, with a bunch of different maps
-- [ ] Print more stages of the simulation - for testing purposes
+- [X] More tests, with a bunch of different maps
+- [X] Print more stages of the simulation - for testing purposes
 - [X] Notes on simulation and ReservationTable
 - [X] Modify the rest of the code to match new mapf algorithm
-- [X] Update ReservationTable to handle capacities - see chat
+- [X] Update ReservationTable to handle capacities
     (Graph already has helper methods to get zone/connection capacities)
 
 # GUI:
 - [X] Minimal vizualization - hard to read, needs fixing
-- [ ] Some of it doesn't match subject requirements - fix it 
-- [ ] take notes 
-- [X] Create a new chat and start Visualization probably?
-    (give it all files so far for context)
+- [X] Some of it doesn't match subject requirements - fix it 
+- [X] take notes 
 
 # Later:
 - [X] Starrted visualization
 - [X] Traffic simulation
 - [X] Create a main file so we can just update it as the project grows
-- [ ] Create test programs to verify project functionality (not submitted or
+- [X] Create test programs to verify project functionality (not submitted or
         graded). Use frameworks like pytest or unittest for unit tests, covering 
         ege cases.
 - [X] Is algorithm too naif? Yes, it was. Now it's smarter
 
 # General
-- [ ] think about project structure:
+- [X] think about project structure:
     - What should be a package with init?
     - How to organize directories?
 - [X] choose algorithm(s)
 - [X] decide graph's structure
 - [X] stardef multi-agent path finding
-- [ ] DOCSTRINGS!!!
-- [ ] Mypy + flake8
-- [ ] README
-- [ ] Re-name files, Reestructure them and maybe redistribute classes
+- [X] DOCSTRINGS!!!
+- [X] Mypy + flake8
+- [X] README
+- [X] Re-name files, Reestructure them and maybe redistribute classes
 - [X] tui simulation
 - [X] fixed a bunch of subject missmatches
 - [X] new main file
