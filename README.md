@@ -105,7 +105,7 @@ Average drones moved per turn: 3.00
 
 ### Expected visualization
 
-> *Placeholder: insert a screenshot of the visualizer running the example map.*
+![](assets/simple_fork_gui.png)
 
 ---
 
